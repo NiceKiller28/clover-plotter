@@ -338,6 +338,17 @@
   .checks.small li{font-size:14px; color:var(--muted)}
   .checks.small .dot{width:20px; height:20px}
   .checks.small .dot .i{width:12px; height:12px}
+  .holder{display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, 1fr); gap:10px 28px; align-items:center; padding:22px 26px 22px 18px; overflow:hidden}
+  .holder-art{position:relative; border-radius:16px; background:radial-gradient(70% 65% at 50% 55%, color-mix(in srgb, var(--accent) 12%, var(--surface-alt)), var(--surface) 75%)}
+  .holder-art img{display:block; width:100%; height:auto}
+  .holder-text .chip{gap:5px}
+  .holder-text .chip .i{width:12px; height:12px; stroke-width:2.6}
+  .holder-text h3{margin:12px 0 6px; font-size:22px; font-weight:760; letter-spacing:-.01em}
+  .holder-text > p{margin:0; color:var(--muted); font-size:15px}
+  .holder-text .checks{margin:14px 0 20px}
+  .holder-text .btn .i{width:16px; height:16px}
+  .holder-text .note{margin-top:12px}
+  @media (max-width:900px){ .holder{grid-template-columns:minmax(0, 1fr); padding:16px} }
 
   .faq{display:grid; gap:10px; max-width:860px}
   .faq details{padding:0 20px}
@@ -529,6 +540,7 @@
     <a href="#handwriting" data-section="handwriting"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg>Свой почерк</a>
     <a href="#install" data-section="install"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Установка</a>
     <a href="#guide" data-section="guide"><svg class="i" aria-hidden="true"><use href="#i-route"/></svg>Инструкция<span class="badge">7</span></a>
+    <a href="#holder" data-section="holder"><svg class="i" aria-hidden="true"><use href="#i-box"/></svg>Держатель</a>
     <a href="#faq" data-section="faq"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg>Вопросы</a>
   </nav>
   <div class="side-fill"></div>
@@ -737,7 +749,7 @@
         <li><span class="num">2</span><div><b>Сделайте homing по всем трём осям</b><p>Вручную, через меню принтера: обычный homing по X, Y и Z.</p></div></li>
         <li><span class="num">3</span><div><b>Поднимите сопло</b><p>Повыше по оси Z, чтобы было удобно положить лист и поставить ручку.</p></div></li>
         <li><span class="num">4</span><div><b>Закрепите лист бумаги</b><p>На столе принтера — так, чтобы он не сдвигался во время письма.</p></div></li>
-        <li class="opt"><span class="num">5</span><div><b>Установите ручку в держатель <em>по желанию</em></b><p>Вылет кончика пера — примерно на <code>12,00 мм</code> ниже среза сопла: так заложено в профиле.</p></div></li>
+        <li class="opt"><span class="num">5</span><div><b>Установите ручку в держатель <em>по желанию</em></b><p>Вылет кончика пера — примерно на <code>12,00 мм</code> ниже среза сопла: так заложено в профиле. Держатель, если его ещё нет, — <a href="#holder">наш выбор ниже</a>.</p></div></li>
         <li class="opt"><span class="num">6</span><div><b>Опустите ось Z в ноль и проверьте прижим <em>по желанию</em></b><p>Ручка должна касаться бумаги в меру: в профиле заложен преднатяг <code>0,35 мм</code>.</p></div></li>
         <li class="opt"><span class="num">7</span><div><b>Поднимите сопло и запускайте файл <em>по желанию</em></b><p>Первый лист — под присмотром: при опасном движении остановите печать.</p></div></li>
       </ol>
@@ -764,6 +776,30 @@
             <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>поддержка новых принтеров.</span></li>
           </ul>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="holder">
+    <div class="section-head reveal">
+      <h2>Держатель для ручки</h2>
+      <p>Рекомендуем проверенный держатель для Bambu Lab A1 — его можно напечатать на том же принтере.</p>
+    </div>
+    <div class="panel holder reveal d1">
+      <div class="holder-art">
+        <img src="holder.webp" width="960" height="569" loading="lazy" alt="Детали держателя ручки: корпус с зажимом для ручки, крышка и винт">
+      </div>
+      <div class="holder-text">
+        <span class="chip"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Рекомендуем</span>
+        <h3>A1 Pen Plotter</h3>
+        <p>Держатель крепится рядом с соплом и надёжно держит ручку, пока принтер пишет.</p>
+        <ul class="checks small">
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>три варианта зажима — тугой, средний и свободный, под толщину вашей ручки;</span></li>
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>крышка печатается без поддержек;</span></li>
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>в комплекте винт-фиксатор.</span></li>
+        </ul>
+        <a class="btn primary" href="https://makerworld.com/ru/models/2627691-a1-pen-plotter#profileId-3556556" target="_blank" rel="noopener">Открыть на MakerWorld<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <p class="note">Файлы для печати и инструкция по сборке — на странице модели на MakerWorld.</p>
       </div>
     </div>
   </section>
