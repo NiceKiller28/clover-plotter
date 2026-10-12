@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clover Plotter — рукописный плоттер для 3D-принтера</title>
+<meta name="description" content="Clover Plotter превращает 3D-принтер в плоттер: ручка вместо сопла пишет ваш текст почерком, как от руки — с формулами, таблицами, рисунками и вашим собственным почерком. Бесплатно, для Windows.">
+<meta name="theme-color" content="#E8EDF5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Clover Plotter — рукописный плоттер для 3D-принтера">
+<meta property="og:description" content="Ручка вместо сопла: текст, формулы и рисунки — почерком, как от руки. Bambu Lab A1, A1 mini и не только.">
+<meta property="og:url" content="https://nicekiller28.github.io/clover-plotter/">
+<meta property="og:image" content="https://nicekiller28.github.io/clover-plotter/app-main.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Clover Plotter",
+  "alternateName": "Clover Plotter — рукописный плоттер",
+  "url": "https://nicekiller28.github.io/clover-plotter/",
+  "description": "Превращает 3D-принтер в плоттер: ручка пишет текст почерком, как от руки, с формулами, таблицами и рисунками.",
+  "inLanguage": "ru",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Windows 10/11",
+  "softwareVersion": "1.2.1",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" },
+  "downloadUrl": "https://github.com/NiceKiller28/clover-plotter/releases/latest/download/Clover-Plotter.exe",
+  "screenshot": "https://nicekiller28.github.io/clover-plotter/app-main.png",
+  "author": { "@type": "Person", "name": "NiceKiller28", "url": "https://github.com/NiceKiller28" }
+}
+</script>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-256.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400..800&display=swap">
+<script>
+  // До первой отрисовки: эффекты только с JS и «Плавные анимации» (запоминается для посетителя).
+  (function () {
+    var d = document.documentElement;
+    d.classList.add('js');
+    try {
+      var calm = localStorage.getItem('clover-site-calm') === '1';
+      if (calm || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) d.classList.add('calm');
+    } catch (e) { }
+  })();
+</script>
+<style>
+  /* ---------- Палитра приложения («Клевер») — общая для всей семьи Clover ---------- */
+  :root{
+    /* «Светлое стекло» — как основной стиль программы */
+    --bg:#E8EDF5; --sidebar:#DCE3EE; --surface:#FFFFFF; --surface-alt:#EEF3FA; --hover:#E3EAF4; --border:#D3DCE8;
+    --text:#0E1726; --muted:#4F5F78; --faint:#8593A8; --accent:#0A84FF; --accent-deep:#0A6CDD; --accent-dark:#FFFFFF;
+    --seed:#1F9D6B; --info:#2F7FD8; --warning:#B7791F; --danger:#D64545;
+    --paper:#FFFFFF; --ink:#22408F;
+    --glass-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 12px 32px -16px rgba(40,64,110,.30), 0 2px 6px -2px rgba(40,64,110,.10);
+    --faint-text: color-mix(in srgb, var(--faint) 45%, var(--muted));
+    --ease: cubic-bezier(.22,1,.36,1);
+    --side: 250px;
+    --radius: 20px;
+    color-scheme: light;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:24px}
+  body{
+    margin:0; color:var(--text);
+    background:
+      radial-gradient(1100px 680px at 88% -8%, rgba(10,132,255,.11), transparent 62%),
+      radial-gradient(900px 620px at -8% 108%, rgba(120,92,230,.08), transparent 60%),
+      var(--bg);
+    background-attachment:fixed;
+    font-family:"Noto Sans","Segoe UI",system-ui,-apple-system,sans-serif; font-size:15px; line-height:1.55;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  a{color:inherit}
+  img{max-width:100%; height:auto; display:block}
+  html, body{overflow-x:clip}
+  .sr{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
+  a:focus-visible, button:focus-visible, summary:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:10px}
+  .i{width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round}
+  .app-icon{display:block; width:44px; height:44px; flex:none}
+
+  /* ---------- Кнопки-«капсулы» из стекла, как в программе ---------- */
+  .btn{
+    position:relative; overflow:hidden; display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    height:44px; padding:0 20px; border-radius:999px; border:1px solid var(--border); box-shadow:var(--glass-shadow);
+    background:var(--surface); color:var(--text); font:inherit; font-size:14.5px; font-weight:600; white-space:nowrap;
+    text-decoration:none; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition:background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .25s ease;
+  }
+  .btn:hover{background:var(--hover); border-color:color-mix(in srgb, var(--border) 60%, var(--accent))}
+  .btn:active{transform:scale(.98)}
+  .btn.primary{background:var(--accent); border-color:color-mix(in srgb, var(--accent) 88%, white); color:var(--accent-dark)}
+  .btn.primary:hover{background:color-mix(in srgb, var(--accent) 82%, white); box-shadow:0 8px 28px -8px color-mix(in srgb, var(--accent) 70%, transparent)}
+  .btn.big{height:52px; padding:0 26px; font-size:16px; border-radius:999px}
+  .btn.primary::after{
+    content:""; position:absolute; top:0; bottom:0; left:-60%; width:45%;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform:skewX(-18deg); opacity:0;
+  }
+  .btn.primary:hover::after{animation:sheen .75s var(--ease)}
+  @keyframes sheen{from{left:-60%; opacity:1} to{left:120%; opacity:1}}
+  .ripple{position:absolute; border-radius:50%; pointer-events:none; background:currentColor; opacity:.25; transform:scale(0); animation:ripple .55s ease-out forwards}
+  @keyframes ripple{to{transform:scale(1); opacity:0}}
+
+  /* ---------- Боковая панель ---------- */
+  .sidebar{
+    position:fixed; z-index:30; top:0; bottom:0; left:0; width:var(--side);
+    display:flex; flex-direction:column; padding:16px 14px 16px; overflow-y:auto;
+    background:color-mix(in srgb, var(--sidebar) 78%, transparent); border-right:1px solid var(--border);
+    -webkit-backdrop-filter:blur(22px) saturate(160%); backdrop-filter:blur(22px) saturate(160%);
+    transition:transform .35s var(--ease);
+  }
+  .family{display:flex; align-items:center; gap:6px; margin:0 6px 14px; padding:6px 10px; border-radius:10px; color:var(--faint-text); font-size:12.5px; text-decoration:none; transition:color .2s ease, background-color .2s ease}
+  .family:hover{color:var(--text); background:color-mix(in srgb, var(--hover) 70%, transparent)}
+  .family .i{width:15px; height:15px; transform:scaleX(-1)}
+  .brand{display:flex; align-items:center; gap:12px; padding:0 8px 22px; text-decoration:none}
+  .brand-text b{display:block; font-size:19px; line-height:1.15; font-weight:750; letter-spacing:-.01em}
+  .brand-text small{display:block; font-size:12.5px; color:var(--muted)}
+  .nav-label{padding:6px 12px 8px; font-size:11px; font-weight:750; letter-spacing:.06em; color:var(--faint-text)}
+  .nav{position:relative; display:flex; flex-direction:column; gap:4px; margin-bottom:18px}
+  .nav a{
+    position:relative; z-index:1; display:flex; align-items:center; gap:12px; height:42px; padding:0 14px; border-radius:999px;
+    color:var(--muted); text-decoration:none; font-size:14.5px; transition:color .2s ease, background-color .2s ease;
+  }
+  .nav a:hover{color:var(--text); background:color-mix(in srgb, var(--hover) 70%, transparent)}
+  .nav a[aria-current="true"]{color:var(--text)}
+  .nav a[aria-current="true"] .i{color:var(--accent)}
+  .nav a[aria-current="true"]:hover{background:transparent}
+  .nav .badge{
+    margin-left:auto; min-width:26px; height:22px; padding:0 8px; border-radius:11px; display:grid; place-items:center;
+    background:var(--surface-alt); color:var(--muted); font-size:11.5px; font-weight:700;
+  }
+  .nav-highlight{
+    position:absolute; left:0; right:0; top:0; height:42px; border-radius:999px; background:var(--surface); box-shadow:var(--glass-shadow);
+    transition:transform .45s var(--ease); pointer-events:none;
+  }
+  .side-fill{flex:1}
+  .side-card{
+    padding:14px 15px; margin-bottom:12px; border-radius:18px; background:var(--surface); border:1px solid var(--border); box-shadow:var(--glass-shadow);
+    font-size:12.5px; color:var(--muted); line-height:1.45;
+  }
+  .side-card b{display:flex; align-items:center; gap:8px; margin-bottom:6px; color:var(--text); font-size:13.5px}
+  .side-card b .i{color:var(--accent); width:16px; height:16px}
+  .side-download{width:100%}
+  .side-meta{margin:8px 4px 0; text-align:center; font-size:12px; color:var(--faint-text)}
+  .toggle{display:flex; align-items:center; gap:12px; margin:16px 4px 6px; background:none; border:0; padding:0; color:var(--muted); font:inherit; font-size:13.5px; cursor:pointer}
+  .toggle .track{position:relative; width:38px; height:22px; border-radius:11px; background:var(--accent); transition:background-color .25s ease}
+  .toggle .track::after{content:""; position:absolute; top:3px; left:19px; width:16px; height:16px; border-radius:50%; background:var(--accent-dark); transition:left .25s var(--ease)}
+  .toggle .track::after{box-shadow:0 1px 3px rgba(20,40,80,.3)}
+  .toggle[aria-pressed="false"] .track{background:#D9E0EA}
+  .toggle[aria-pressed="false"] .track::after{left:3px; background:#FFFFFF}
+  .side-foot{margin:8px 6px 0; font-size:11.5px; color:var(--faint-text)}
+
+  /* ---------- Верхняя полоса на телефоне ---------- */
+  .topbar{
+    display:none; position:fixed; z-index:25; top:0; left:0; right:0; height:62px; padding:0 14px;
+    align-items:center; gap:10px;
+    background:color-mix(in srgb, var(--sidebar) 78%, transparent); border-bottom:1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%);
+  }
+  .topbar .brand{padding:0; margin-right:auto}
+  .topbar .app-icon{width:38px; height:38px}
+  .topbar .brand-text b{font-size:17px}
+  .topbar .btn{height:40px; padding:0 14px; font-size:14px}
+  .menu-btn{width:40px; padding:0}
+  .backdrop{display:none; position:fixed; inset:0; z-index:28; background:rgba(14,23,38,.32); opacity:0; transition:opacity .3s ease}
+
+  .main{margin-left:var(--side); min-width:0}
+
+  /* ---------- Главный экран: стол принтера, лист и перо ---------- */
+  .hero{position:relative; min-height:max(100vh, 720px); min-height:max(100svh, 720px); display:flex; align-items:center; isolation:isolate; overflow:hidden}
+  .hero::before{content:""; position:absolute; inset:0; z-index:-2;
+    background:
+      radial-gradient(60% 55% at 72% 46%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+      radial-gradient(40% 40% at 10% 90%, color-mix(in srgb, var(--seed) 8%, transparent), transparent 70%)}
+  .hero::after{content:""; position:absolute; inset:0; z-index:-1; opacity:.5;
+    background-image:radial-gradient(color-mix(in srgb, var(--border) 85%, var(--accent)) 1px, transparent 1.2px); background-size:26px 26px;
+    -webkit-mask-image:radial-gradient(70% 70% at 70% 50%, #000 30%, transparent 80%); mask-image:radial-gradient(70% 70% at 70% 50%, #000 30%, transparent 80%)}
+  .hero-inner{width:100%; max-width:1240px; margin:0 auto; padding:70px clamp(20px, 5vw, 64px); display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.05fr); gap:clamp(24px, 4vw, 60px); align-items:center}
+  .pill{
+    display:inline-flex; align-items:center; gap:10px; height:34px; padding:0 14px 0 5px; margin-bottom:22px; border-radius:17px;
+    background:color-mix(in srgb, var(--surface) 70%, transparent); border:1px solid var(--border); color:var(--text);
+    text-decoration:none; font-size:13.5px; white-space:nowrap; max-width:100%; transition:background-color .2s ease, border-color .2s ease;
+  }
+  .pill:hover{background:var(--hover); border-color:color-mix(in srgb, var(--border) 50%, var(--accent))}
+  .chip{display:inline-flex; align-items:center; gap:5px; height:24px; padding:0 10px; border-radius:12px; background:var(--accent); color:var(--accent-dark); font-weight:750; font-size:12px}
+  .chip .i{width:13px; height:13px; stroke-width:2.2}
+  .pill > .i{width:14px; height:14px; color:var(--muted)}
+  .pill > span:nth-child(2){overflow:hidden; text-overflow:ellipsis}
+  .pill{overflow:hidden}
+  .hero-copy{min-width:0}
+  .hero h1{margin:0; font-size:clamp(44px, 5.6vw, 82px); line-height:1.02; font-weight:800; letter-spacing:-.01em}
+  .hero h1 .soft{color:var(--accent)}
+  .caption{margin:14px 0 0; font-size:13px; letter-spacing:.5em; color:var(--muted); text-transform:lowercase}
+  .tagline{max-width:560px; margin:22px 0 0; font-size:clamp(16px, 1.35vw, 18.5px); line-height:1.55; color:color-mix(in srgb, var(--text) 82%, var(--muted))}
+  .cta{display:flex; flex-wrap:wrap; gap:12px; margin-top:30px}
+  .meta{margin-top:16px; font-size:13px; color:var(--faint-text)}
+  .meta b{color:var(--muted); font-weight:600}
+
+  .bed{
+    position:relative; aspect-ratio:1 / .9; width:100%; max-width:600px; justify-self:center; border-radius:28px; padding:6% 5%;
+    background:
+      radial-gradient(circle at 1px 1px, rgba(30,60,120,.07) 1px, transparent 1.5px) 0 0 / 14px 14px,
+      linear-gradient(160deg, #FFFFFF, #EAF0F8);
+    border:1px solid var(--border);
+    box-shadow:0 50px 90px -40px rgba(40,64,110,.38), inset 0 1px 0 rgba(255,255,255,.95);
+    display:grid; place-items:center;
+  }
+  .bed-label{position:absolute; left:20px; top:16px; display:flex; gap:8px; flex-wrap:wrap}
+  .bed-label span{display:inline-flex; align-items:center; gap:6px; height:24px; padding:0 10px; border-radius:12px; background:color-mix(in srgb, var(--surface-alt) 85%, transparent); color:var(--muted); font-size:12px}
+  .bed-label span:first-child{color:var(--accent)}
+  .bed-label .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent)}
+  .js:not(.calm) .bed-label .dot{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent)}}
+  .paper{width:100%; height:auto; overflow:visible; transform:rotate(-3deg); filter:drop-shadow(0 22px 26px rgba(40,64,110,.22))}
+  .paper .sheet{fill:var(--paper)}
+  .paper .grid line{stroke:#CFDDEB; stroke-width:1}
+  .paper .margin{stroke:#E6A3A1; stroke-width:1.6}
+  .paper .ink path{stroke:var(--ink); stroke-width:3.2}
+  .paper .ink{transition:opacity .6s ease}
+  .paper .ink.fade{opacity:0}
+  #pen{transition:opacity .4s ease}
+  .calm #pen{opacity:0}
+  .bed-foot{position:absolute; right:20px; bottom:14px; color:var(--faint-text); font-size:12px}
+
+  /* ---------- Разделы ---------- */
+  .section{padding:90px clamp(20px, 5vw, 64px); max-width:1240px; margin:0 auto}
+  .section-head{margin-bottom:34px}
+  .section-head h2{margin:0; font-size:clamp(28px, 3.2vw, 38px); line-height:1.15; font-weight:780; letter-spacing:-.015em}
+  .section-head p{margin:10px 0 0; max-width:660px; color:var(--muted); font-size:16px}
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--glass-shadow); transition:border-color .3s ease, transform .3s var(--ease), background-color .3s ease}
+
+  .shot{position:relative; width:100%; border-radius:16px; overflow:hidden; border:1px solid var(--border); background:var(--sidebar);
+    box-shadow:0 40px 80px -30px rgba(40,64,110,.38), 0 0 0 1px rgba(255,255,255,.6)}
+  .shot-wrap{position:relative}
+  .shot-wrap::before{content:""; position:absolute; inset:8% 6% -4%; z-index:-1; border-radius:40px; filter:blur(60px);
+    background:radial-gradient(closest-side, color-mix(in srgb, var(--accent) 22%, transparent), transparent)}
+
+  .metrics{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-top:26px}
+  .metric{padding:14px 16px 14px; border-radius:14px; min-height:104px}
+  .metric:hover{border-color:color-mix(in srgb, var(--border) 45%, var(--accent)); background:color-mix(in srgb, var(--surface) 70%, var(--hover))}
+  .metric-cap{display:flex; align-items:center; gap:9px; font-size:12.5px; font-weight:700; color:var(--muted)}
+  .tile{width:26px; height:26px; flex:none; border-radius:8px; display:grid; place-items:center; color:var(--accent); background:color-mix(in srgb, var(--accent) 16%, transparent)}
+  .tile .i{width:15px; height:15px}
+  .metric-value{margin-top:8px; font-size:26px; line-height:1.2; font-weight:780}
+  .metric-hint{margin-top:4px; font-size:12px; color:var(--muted)}
+
+  /* Как это работает: четыре шага по порядку. */
+  .flow{display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; counter-reset:step}
+  .flow .step{position:relative; padding:24px 22px}
+  .flow .step:not(:last-child)::after{content:""; position:absolute; top:41px; right:-14px; width:14px; height:2px; background:color-mix(in srgb, var(--border) 60%, var(--accent))}
+  .num{width:36px; height:36px; border-radius:50%; display:grid; place-items:center; margin-bottom:16px; background:var(--accent); color:var(--accent-dark); font-weight:800}
+  .step h3{margin:0 0 6px; font-size:17px; font-weight:720}
+  .step p{margin:0; color:var(--muted); font-size:14px}
+  .step code, .faq code{font-family:"Cascadia Mono",Consolas,monospace; font-size:13px; color:var(--accent); background:var(--surface-alt); padding:1px 6px; border-radius:6px}
+
+  .features{display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:14px}
+  .feature{padding:22px 22px 20px}
+  .feature:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--border) 45%, var(--accent))}
+  .feature .tile{width:42px; height:42px; border-radius:12px; margin-bottom:16px}
+  .feature .tile .i{width:21px; height:21px}
+  .feature h3{margin:0 0 6px; font-size:16.5px; font-weight:720}
+  .feature p{margin:0; color:var(--muted); font-size:14px}
+
+  .split{display:grid; grid-template-columns:minmax(0, .9fr) minmax(0, 1.25fr); gap:48px; align-items:center}
+  .split.flip{grid-template-columns:minmax(0, 1.25fr) minmax(0, .9fr)}
+  .split h2{margin:0; font-size:clamp(28px, 3vw, 36px); line-height:1.15; font-weight:780; letter-spacing:-.015em}
+  .split .lead{margin:14px 0 22px; color:var(--muted); font-size:16px}
+  .checks{list-style:none; margin:0 0 28px; padding:0; display:grid; gap:12px}
+  .checks li{display:flex; gap:12px; align-items:flex-start}
+  .checks .dot{width:24px; height:24px; flex:none; border-radius:50%; display:grid; place-items:center; margin-top:1px;
+    background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent)}
+  .checks .dot .i{width:14px; height:14px; stroke-width:2.4}
+  .checks b{font-weight:650}
+  .checks span{color:var(--muted)}
+
+  /* Принтеры. */
+  .printers{display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px}
+  .printer{display:flex; align-items:center; gap:14px; padding:16px 18px}
+  .printer:hover{border-color:color-mix(in srgb, var(--border) 45%, var(--accent))}
+  .printer .tile{width:40px; height:40px; border-radius:11px}
+  .printer .tile .i{width:20px; height:20px}
+  .printer b{display:block; font-size:14.5px; font-weight:680}
+  .printer small{display:block; color:var(--muted); font-size:12.5px}
+  .printer.top-pick{border-color:color-mix(in srgb, var(--border) 35%, var(--accent)); background:linear-gradient(120deg, color-mix(in srgb, var(--accent) 10%, var(--surface)), var(--surface) 70%)}
+  .printer .tag{display:inline-block; margin-top:6px; font-size:11px; font-weight:750; color:var(--accent-dark); background:var(--accent); padding:2px 8px; border-radius:8px; white-space:nowrap}
+  .note{margin:16px 0 0; color:var(--faint-text); font-size:13px; max-width:760px}
+
+  /* Установка. */
+  .steps{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px}
+  .steps .step{padding:24px 22px}
+  .get{
+    display:flex; align-items:center; gap:22px; margin-top:14px; padding:22px 24px;
+    background:linear-gradient(120deg, color-mix(in srgb, var(--accent) 14%, var(--surface)), var(--surface) 60%);
+  }
+  .get .app-icon{width:62px; height:62px}
+  .get-text{margin-right:auto; min-width:0}
+  .get > .btn{flex:none}
+  .get-text b{display:block; font-size:18px}
+  .get-text > span{color:var(--muted); font-size:14px}
+  .reqs{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+  .req{display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 10px; border-radius:13px; background:var(--surface-alt); color:var(--muted); font-size:12.5px}
+  .req .i{width:13px; height:13px; color:var(--accent)}
+  .prep{margin-top:14px; padding:22px 24px}
+  .prep h3{margin:0 0 4px; font-size:17px; display:flex; align-items:center; gap:10px}
+  .prep h3 .i{color:var(--warning)}
+  .prep > p{margin:0 0 12px; color:var(--muted); font-size:14px}
+  .prep ol{margin:0; padding-left:22px; display:grid; gap:7px; color:color-mix(in srgb, var(--text) 85%, var(--muted)); font-size:14px}
+
+  .to-guide{display:flex; align-items:center; gap:16px; margin-top:14px; padding:18px 22px; text-decoration:none}
+  .to-guide:hover{border-color:color-mix(in srgb, var(--border) 40%, var(--accent)); transform:translateY(-2px)}
+  .to-guide b{display:block; font-size:16px}
+  .to-guide span span{display:block; color:var(--muted); font-size:14px}
+  .to-guide > .i{margin-left:auto; color:var(--muted)}
+  .warn-tile{color:var(--warning)!important; background:color-mix(in srgb, var(--warning) 16%, transparent)!important}
+
+  /* Инструкция: шаги по порядку слева, пояснения справа. */
+  .guide{display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, .95fr); gap:24px; align-items:start}
+  .timeline{list-style:none; margin:0; padding:0; display:grid; gap:0; position:relative}
+  .timeline li{position:relative; display:flex; gap:16px; padding:0 0 22px}
+  .timeline li:not(:last-child)::before{content:""; position:absolute; left:17px; top:40px; bottom:4px; width:2px; border-radius:1px;
+    background:color-mix(in srgb, var(--border) 70%, var(--accent))}
+  .timeline .num{flex:none; margin:0}
+  .timeline li.opt .num{background:var(--surface-alt); color:var(--accent); border:1px solid color-mix(in srgb, var(--border) 50%, var(--accent))}
+  .timeline b{display:block; font-size:16px; font-weight:700; padding-top:6px}
+  .timeline b em{font-style:normal; margin-left:8px; font-size:11.5px; font-weight:700; color:var(--accent); background:color-mix(in srgb, var(--accent) 14%, transparent); padding:2px 8px; border-radius:8px; vertical-align:2px}
+  .timeline p{margin:4px 0 0; color:var(--muted); font-size:14.5px}
+  .timeline code, .callout code{font-family:"Cascadia Mono",Consolas,monospace; font-size:13px; color:var(--accent); background:var(--surface-alt); padding:1px 6px; border-radius:6px}
+  .guide-side{display:grid; gap:14px}
+  .callout{padding:20px 22px}
+  .callout .tile{width:38px; height:38px; border-radius:11px; margin-bottom:12px}
+  .callout .tile .i{width:19px; height:19px}
+  .callout h3{margin:0 0 6px; font-size:16.5px; font-weight:720}
+  .callout p{margin:0; color:var(--muted); font-size:14px}
+  .callout.soft{background:linear-gradient(120deg, color-mix(in srgb, var(--accent) 9%, var(--surface)), var(--surface) 70%)}
+  .checks.small{margin:12px 0 0; gap:8px}
+  .checks.small li{font-size:14px; color:var(--muted)}
+  .checks.small .dot{width:20px; height:20px}
+  .checks.small .dot .i{width:12px; height:12px}
+
+  .faq{display:grid; gap:10px; max-width:860px}
+  .faq details{padding:0 20px}
+  .faq details[open]{border-color:color-mix(in srgb, var(--border) 50%, var(--accent))}
+  .faq summary{list-style:none; display:flex; align-items:center; gap:14px; min-height:60px; cursor:pointer; font-weight:650; font-size:15.5px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary .i{margin-left:auto; color:var(--muted); transition:transform .3s var(--ease)}
+  .faq details[open] summary .i{transform:rotate(180deg)}
+  .faq details p{margin:0 0 18px; color:var(--muted); font-size:14.5px}
+
+  footer{border-top:1px solid var(--border); padding:30px clamp(20px, 5vw, 64px) 40px; color:var(--faint-text); font-size:13px}
+  footer .row{max-width:1240px; margin:0 auto; display:flex; flex-wrap:wrap; gap:14px 28px; align-items:center}
+  footer .brand{padding:0}
+  footer .app-icon{width:34px; height:34px}
+  footer .brand-text b{font-size:16px}
+  footer a{color:var(--muted)}
+  footer a:hover{color:var(--text)}
+
+  /* Появление. */
+  .js .hero-copy > *{opacity:0; animation:rise .8s var(--ease) both}
+  .js .hero-copy > :nth-child(2){animation-delay:.12s}
+  .js .hero-copy > :nth-child(3){animation-delay:.22s}
+  .js .hero-copy > :nth-child(4){animation-delay:.32s}
+  .js .hero-copy > :nth-child(5){animation-delay:.42s}
+  .js .hero-copy > :nth-child(6){animation-delay:.52s}
+  .js .bed{animation:rise 1s var(--ease) .2s both}
+  @keyframes rise{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+  .js .reveal{opacity:0; transform:translateY(22px); transition:opacity .8s var(--ease), transform .8s var(--ease)}
+  .js .reveal.in{opacity:1; transform:none}
+  .js .reveal.d1{transition-delay:.08s} .js .reveal.d2{transition-delay:.16s} .js .reveal.d3{transition-delay:.24s}
+  .calm *, .calm *::before, .calm *::after{animation:none!important; transition:none!important}
+  .calm.js .reveal, .calm.js .hero-copy > *, .calm.js .bed{opacity:1; transform:none}
+
+  /* ---------- Адаптивность ---------- */
+  @media (max-width:1180px){
+    .hero-inner{grid-template-columns:minmax(0, 1fr); text-align:left}
+    .bed{max-width:560px}
+  }
+  @media (max-width:1100px){
+    .metrics, .flow{grid-template-columns:repeat(2, 1fr)}
+    .flow .step::after{display:none}
+    .split, .split.flip{grid-template-columns:1fr; gap:32px}
+    .guide{grid-template-columns:minmax(0, 1fr)}
+    .steps{grid-template-columns:1fr}
+  }
+  @media (max-width:1000px){
+    .sidebar{transform:translateX(-100%); width:min(300px, 86vw)}
+    .nav-open .sidebar{transform:none; box-shadow:30px 0 60px rgba(40,64,110,.25)}
+    .nav-open .backdrop{display:block; opacity:1}
+    .topbar{display:flex}
+    .main{margin-left:0}
+    .hero-inner{padding-top:100px}
+    .section{padding-top:70px; padding-bottom:70px}
+    html{scroll-padding-top:74px}
+  }
+  @media (max-width:560px){
+    .metrics, .flow{grid-template-columns:1fr}
+    .get{flex-direction:column; align-items:flex-start}
+    .get .btn, .cta .btn{width:100%}
+    .cta{width:100%}
+    .topbar .dl-text{display:none}
+    .caption{font-size:12px; letter-spacing:.38em}
+    .bed{border-radius:20px; padding:16% 5% 9%}
+  }
+  @media (max-width:420px){ .pill .wide{display:none} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+<symbol id="plotter-icon" viewBox="0 0 1024 1024">
+<defs>
+  <clipPath id="pgs-clip"><path d="M992 512 L991.6 673.2 L990.4 724.6 L988.3 761.7 L985.4 791.5 L981.6 816.8 L977 838.9 L971.6 858.4 L965.2 875.8 L957.8 891.4 L949.6 905.6 L940.2 918.3 L929.9 929.9 L918.3 940.2 L905.6 949.6 L891.4 957.8 L875.8 965.2 L858.4 971.6 L838.9 977 L816.8 981.6 L791.5 985.4 L761.7 988.3 L724.6 990.4 L673.2 991.6 L512 992 L350.8 991.6 L299.4 990.4 L262.3 988.3 L232.5 985.4 L207.2 981.6 L185.1 977 L165.6 971.6 L148.2 965.2 L132.6 957.8 L118.4 949.6 L105.7 940.2 L94.1 929.9 L83.8 918.3 L74.4 905.6 L66.2 891.4 L58.8 875.8 L52.4 858.4 L47 838.9 L42.4 816.8 L38.6 791.5 L35.7 761.7 L33.6 724.6 L32.4 673.2 L32 512 L32.4 350.8 L33.6 299.4 L35.7 262.3 L38.6 232.5 L42.4 207.2 L47 185.1 L52.4 165.6 L58.8 148.2 L66.2 132.6 L74.4 118.4 L83.8 105.7 L94.1 94.1 L105.7 83.8 L118.4 74.4 L132.6 66.2 L148.2 58.8 L165.6 52.4 L185.1 47 L207.2 42.4 L232.5 38.6 L262.3 35.7 L299.4 33.6 L350.8 32.4 L512 32 L673.2 32.4 L724.6 33.6 L761.7 35.7 L791.5 38.6 L816.8 42.4 L838.9 47 L858.4 52.4 L875.8 58.8 L891.4 66.2 L905.6 74.4 L918.3 83.8 L929.9 94.1 L940.2 105.7 L949.6 118.4 L957.8 132.6 L965.2 148.2 L971.6 165.6 L977 185.1 L981.6 207.2 L985.4 232.5 L988.3 262.3 L990.4 299.4 L991.6 350.8Z"/></clipPath>
+  <linearGradient id="pgs-bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset=".55" stop-color="#DCE8FB"/><stop offset="1" stop-color="#A9C6F0"/>
+  </linearGradient>
+  <radialGradient id="pgs-glow1" cx=".38" cy=".34" r=".55"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".75"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  <radialGradient id="pgs-glow2" cx=".82" cy=".86" r=".5"><stop offset="0" stop-color="#7FB6FF" stop-opacity=".55"/><stop offset="1" stop-color="#7FB6FF" stop-opacity="0"/></radialGradient>
+  <linearGradient id="pgs-sheet" x1="0" y1="0" x2=".6" y2="1">
+    <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.6"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity="0.3"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0.2"/>
+  </linearGradient>
+  <linearGradient id="pgs-rim" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7FA6D9" stop-opacity=".95"/><stop offset=".45" stop-color="#7FA6D9" stop-opacity=".25"/><stop offset="1" stop-color="#7FA6D9" stop-opacity=".55"/>
+  </linearGradient>
+  <linearGradient id="pgs-nib" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF" stop-opacity=".95"/><stop offset=".45" stop-color="#BFD9FF" stop-opacity=".85"/><stop offset="1" stop-color="#4F97F5" stop-opacity=".75"/>
+  </linearGradient>
+  <linearGradient id="pgs-collar" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#6EA8F5" stop-opacity=".9"/><stop offset=".5" stop-color="#D6E7FF" stop-opacity=".8"/><stop offset="1" stop-color="#4F8DE6" stop-opacity=".9"/>
+  </linearGradient>
+  <linearGradient id="pgs-edge" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF" stop-opacity=".6"/><stop offset=".35" stop-color="#FFFFFF" stop-opacity=".14"/><stop offset="1" stop-color="#FFFFFF" stop-opacity=".06"/>
+  </linearGradient>
+  <linearGradient id="pgs-sheen" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF" stop-opacity=".24"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+  </linearGradient>
+  <filter id="pgs-blur-xl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="60"/></filter>
+  <filter id="pgs-shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
+  <filter id="pgs-ink-glow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+  <filter id="pgs-frost" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="26"/></filter>
+</defs>
+<g clip-path="url(#pgs-clip)">
+<rect width="1024" height="1024" fill="url(#pgs-bg)"/>
+<circle cx="380" cy="330" r="420" fill="url(#pgs-glow1)" filter="url(#pgs-blur-xl)"/>
+<circle cx="860" cy="880" r="380" fill="url(#pgs-glow2)" filter="url(#pgs-blur-xl)"/>
+<rect x="213" y="260" width="470" height="600" rx="54" fill="#000" opacity=".34" filter="url(#pgs-shadow)" transform="translate(10 34) rotate(-7 448 560)"/>
+<g transform="rotate(-7 448 560)">
+<clipPath id="pgs-paper"><rect x="213" y="260" width="470" height="600" rx="54"/></clipPath>
+<g clip-path="url(#pgs-paper)"><circle cx="380" cy="330" r="300" fill="#FFFFFF" opacity=".35" filter="url(#pgs-frost)"/></g>
+<rect x="213" y="260" width="470" height="600" rx="54" fill="url(#pgs-sheet)"/>
+<line x1="248" x2="648" y1="434" y2="434" stroke="#7FA6D9" stroke-opacity=".18" stroke-width="3"/>
+<line x1="248" x2="648" y1="559" y2="559" stroke="#7FA6D9" stroke-opacity=".18" stroke-width="3"/>
+<line x1="248" x2="648" y1="684" y2="684" stroke="#7FA6D9" stroke-opacity=".18" stroke-width="3"/>
+<rect x="213" y="260" width="470" height="600" rx="54" fill="none" stroke="url(#pgs-rim)" stroke-width="5"/>
+<path d="M267.6 426 C277.2 424 286.8 420 290 420 C307.9 420 329.7 376 315.6 376 C301.5 376 307.9 420 354 420 C371.9 420 393.7 325 379.6 325 C365.5 325 371.9 420 418 420 C435.9 420 457.7 376 443.6 376 C429.5 376 435.9 420 482 420 M267.6 551 C277.2 549 286.8 545 290 545 C307.9 545 329.7 501 315.6 501 C301.5 501 307.9 545 354 545 C371.9 545 393.7 450 379.6 450 C365.5 450 371.9 545 418 545 C435.9 545 457.7 501 443.6 501 C429.5 501 435.9 545 482 545 M267.6 676 C277.2 674 286.8 670 290 670 C307.9 670 329.7 626 315.6 626 C301.5 626 307.9 670 354 670 C371.9 670 393.7 575 379.6 575 C365.5 575 371.9 670 418 670 C435.9 670 457.7 626 443.6 626 C429.5 626 435.9 670 482 670 C499.9 670 521.7 626 507.6 626 C493.5 626 499.9 670 546 670" fill="none" stroke="#7FB6FF" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" opacity=".8" filter="url(#pgs-ink-glow)"/>
+<path d="M267.6 426 C277.2 424 286.8 420 290 420 C307.9 420 329.7 376 315.6 376 C301.5 376 307.9 420 354 420 C371.9 420 393.7 325 379.6 325 C365.5 325 371.9 420 418 420 C435.9 420 457.7 376 443.6 376 C429.5 376 435.9 420 482 420 M267.6 551 C277.2 549 286.8 545 290 545 C307.9 545 329.7 501 315.6 501 C301.5 501 307.9 545 354 545 C371.9 545 393.7 450 379.6 450 C365.5 450 371.9 545 418 545 C435.9 545 457.7 501 443.6 501 C429.5 501 435.9 545 482 545 M267.6 676 C277.2 674 286.8 670 290 670 C307.9 670 329.7 626 315.6 626 C301.5 626 307.9 670 354 670 C371.9 670 393.7 575 379.6 575 C365.5 575 371.9 670 418 670 C435.9 670 457.7 626 443.6 626 C429.5 626 435.9 670 482 670 C499.9 670 521.7 626 507.6 626 C493.5 626 499.9 670 546 670" fill="none" stroke="#0A6CDD" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g transform="translate(22 30)" opacity=".4" filter="url(#pgs-shadow)"><g transform="translate(564.7 661.2) rotate(-143.1)"><path d="M0 0 C17.1 48 107 100 117.7 180 C128.4 248 113.4 296 107 312 L89.9 400 L-89.9 400 L-107 312 C-113.4 296 -128.4 248 -117.7 180 C-107 100 -17.1 48 0 0Z" fill="#000"/><rect x="-98.4" y="392" width="196.9" height="88" rx="22" fill="#000"/></g></g>
+<g transform="translate(564.7 661.2) rotate(-143.1)">
+<rect x="-98.4" y="392" width="196.9" height="88" rx="22" fill="url(#pgs-collar)"/>
+<rect x="-98.4" y="392" width="196.9" height="88" rx="22" fill="none" stroke="#FFFFFF" stroke-opacity=".45" stroke-width="4"/>
+<path d="M0 0 C17.1 48 107 100 117.7 180 C128.4 248 113.4 296 107 312 L89.9 400 L-89.9 400 L-107 312 C-113.4 296 -128.4 248 -117.7 180 C-107 100 -17.1 48 0 0Z" fill="url(#pgs-nib)"/>
+<path d="M-21.4 64 C-89.9 112 -107 168 -107 240" fill="none" stroke="#FFFFFF" stroke-opacity=".85" stroke-width="10" stroke-linecap="round"/>
+<path d="M0 0 C17.1 48 107 100 117.7 180 C128.4 248 113.4 296 107 312 L89.9 400 L-89.9 400 L-107 312 C-113.4 296 -128.4 248 -117.7 180 C-107 100 -17.1 48 0 0Z" fill="none" stroke="#FFFFFF" stroke-opacity=".6" stroke-width="4"/>
+<path d="M0 26 L0 200" stroke="#0B3D8C" stroke-opacity=".75" stroke-width="9" stroke-linecap="round"/>
+<circle cx="0" cy="224" r="24" fill="#0B3D8C" fill-opacity=".72"/>
+<circle cx="0" cy="224" r="24" fill="none" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="4"/>
+</g>
+<ellipse cx="512" cy="40" rx="560" ry="360" fill="url(#pgs-sheen)"/>
+</g>
+<path d="M992 512 L991.6 673.2 L990.4 724.6 L988.3 761.7 L985.4 791.5 L981.6 816.8 L977 838.9 L971.6 858.4 L965.2 875.8 L957.8 891.4 L949.6 905.6 L940.2 918.3 L929.9 929.9 L918.3 940.2 L905.6 949.6 L891.4 957.8 L875.8 965.2 L858.4 971.6 L838.9 977 L816.8 981.6 L791.5 985.4 L761.7 988.3 L724.6 990.4 L673.2 991.6 L512 992 L350.8 991.6 L299.4 990.4 L262.3 988.3 L232.5 985.4 L207.2 981.6 L185.1 977 L165.6 971.6 L148.2 965.2 L132.6 957.8 L118.4 949.6 L105.7 940.2 L94.1 929.9 L83.8 918.3 L74.4 905.6 L66.2 891.4 L58.8 875.8 L52.4 858.4 L47 838.9 L42.4 816.8 L38.6 791.5 L35.7 761.7 L33.6 724.6 L32.4 673.2 L32 512 L32.4 350.8 L33.6 299.4 L35.7 262.3 L38.6 232.5 L42.4 207.2 L47 185.1 L52.4 165.6 L58.8 148.2 L66.2 132.6 L74.4 118.4 L83.8 105.7 L94.1 94.1 L105.7 83.8 L118.4 74.4 L132.6 66.2 L148.2 58.8 L165.6 52.4 L185.1 47 L207.2 42.4 L232.5 38.6 L262.3 35.7 L299.4 33.6 L350.8 32.4 L512 32 L673.2 32.4 L724.6 33.6 L761.7 35.7 L791.5 38.6 L816.8 42.4 L838.9 47 L858.4 52.4 L875.8 58.8 L891.4 66.2 L905.6 74.4 L918.3 83.8 L929.9 94.1 L940.2 105.7 L949.6 118.4 L957.8 132.6 L965.2 148.2 L971.6 165.6 L977 185.1 L981.6 207.2 L985.4 232.5 L988.3 262.3 L990.4 299.4 L991.6 350.8Z" fill="none" stroke="url(#pgs-edge)" stroke-width="6"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-window" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 9v11"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8 18h6a3.5 3.5 0 0 0 0-7h-4a3.5 3.5 0 0 1 0-7h6"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M5 8h14M9 4v4M12 11v3M10 14h4l-2 3z"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M15.5 4.5 19.5 8.5 9 19H5v-4z"/><path d="m13 7 4 4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 1 1 3.6 2.4c-.7.3-1.1.9-1.1 1.6v.6"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5 9.5 17 19 7.5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 4v16M4 12h16"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1.2C7 8 9 8 12 8zm0 0c1.5-3 5-3.5 5-1.2C17 8 15 8 12 8z"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 7V5h16v2M12 5v14M9 19h6"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 24 24"><path d="M4 17c2-1 3-5 5-5s1 6 3.5 6S15 9 17 9s1 7 3 7"/><path d="M4 21h16"/></symbol>
+    <symbol id="i-sigma" viewBox="0 0 24 24"><path d="M18 5H6l6 7-6 7h12"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></symbol>
+    <symbol id="i-lines" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 8h16M4 12h16M4 16h16M8 3v18"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-pages" viewBox="0 0 24 24"><path d="M8 3h9a2 2 0 0 1 2 2v12"/><rect x="5" y="6" width="11" height="15" rx="2"/></symbol>
+    <symbol id="i-ai" viewBox="0 0 24 24"><path d="m10 4 1.4 4.1L15.5 9.5l-4.1 1.4L10 15l-1.4-4.1L4.5 9.5l4.1-1.4z"/><path d="m17.5 13 .8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8 8 0 1 1 16 0"/><path d="m12 18 4-6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4 2.5 20h19z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M15 6 9 12l6 6"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="Clover Plotter — наверх">
+    <svg class="app-icon" aria-hidden="true"><use href="#plotter-icon"/></svg>
+    <span class="brand-text"><b>Clover Plotter</b></span>
+  </a>
+  <a class="btn primary" href="#install"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg><span class="dl-text">Скачать</span></a>
+  <button class="btn menu-btn" id="menu-btn" type="button" aria-label="Меню" aria-expanded="false" aria-controls="sidebar"><svg class="i" aria-hidden="true"><use href="#i-menu"/></svg></button>
+</header>
+<div class="backdrop" id="backdrop"></div>
+
+<aside class="sidebar" id="sidebar" aria-label="Разделы сайта">
+  <a class="family" href="/"><svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg>Все приложения — Clover Store</a>
+  <a class="brand" href="#top" aria-label="Clover Plotter — наверх">
+    <svg class="app-icon" aria-hidden="true"><use href="#plotter-icon"/></svg>
+    <span class="brand-text"><b>Clover Plotter</b><small>рукописный плоттер</small></span>
+  </a>
+  <div class="nav-label">О ПРОГРАММЕ</div>
+  <nav class="nav" id="nav">
+    <span class="nav-highlight" aria-hidden="true"></span>
+    <a href="#top" data-section="top"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg>Главная</a>
+    <a href="#app" data-section="app"><svg class="i" aria-hidden="true"><use href="#i-window"/></svg>В одном окне</a>
+    <a href="#how" data-section="how"><svg class="i" aria-hidden="true"><use href="#i-route"/></svg>Как это работает</a>
+    <a href="#features" data-section="features"><svg class="i" aria-hidden="true"><use href="#i-grid"/></svg>Возможности<span class="badge">12</span></a>
+    <a href="#printers" data-section="printers"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg>Принтеры<span class="badge">14</span></a>
+    <a href="#handwriting" data-section="handwriting"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg>Свой почерк</a>
+    <a href="#install" data-section="install"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Установка</a>
+    <a href="#guide" data-section="guide"><svg class="i" aria-hidden="true"><use href="#i-route"/></svg>Инструкция<span class="badge">7</span></a>
+    <a href="#faq" data-section="faq"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg>Вопросы</a>
+  </nav>
+  <div class="side-fill"></div>
+  <div class="side-card">
+    <b><svg class="i" aria-hidden="true"><use href="#i-gift"/></svg>Бесплатно</b>
+    Без регистрации и рекламы. Нужны только 3D-принтер и ручка в держателе.
+  </div>
+  <a class="btn primary side-download" href="https://github.com/NiceKiller28/clover-plotter/releases/latest/download/Clover-Plotter.exe" data-dl="exe"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Скачать Clover Plotter</a>
+  <div class="side-meta"><span data-ver>1.2.1</span> · Windows 10/11</div>
+  <button class="toggle" id="calm-toggle" type="button" aria-pressed="true"><span class="track" aria-hidden="true"></span>Плавные анимации</button>
+  <div class="side-foot">Clover Plotter <span data-ver>1.2.1</span> · семья Clover</div>
+</aside>
+
+<main class="main">
+  <section class="hero" id="top" aria-labelledby="hero-title">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <a class="pill" href="#app">
+          <span class="chip"><svg class="i" aria-hidden="true"><use href="#i-sparkle"/></svg>Новое</span>
+          <span>Стеклянное оформление<span class="wide"> — шесть стилей на выбор</span></span>
+          <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg>
+        </a>
+        <h1 id="hero-title">Clover <span class="soft">Plotter</span></h1>
+        <p class="caption">рукописный плоттер</p>
+        <p class="tagline">Превращает 3D-принтер в плоттер: ручка вместо сопла пишет ваш текст почерком, как от руки. Формулы, таблицы, рисунки и даже ваш собственный почерк — что видно в Preview, то и окажется на бумаге.</p>
+        <div class="cta">
+          <a class="btn primary big" href="https://github.com/NiceKiller28/clover-plotter/releases/latest/download/Clover-Plotter.exe" data-dl="exe"><svg class="i" aria-hidden="true"><use href="#i-windows"/></svg>Скачать для Windows</a>
+          <a class="btn big" href="#how"><svg class="i" aria-hidden="true"><use href="#i-route"/></svg>Как это работает</a>
+        </div>
+        <div class="meta"><b>Версия <span data-ver>1.2.1</span></b> · Windows 10/11, 64 бит · <span data-size>80 МБ</span> · один файл, без установки · бесплатно</div>
+      </div>
+      <div class="bed" aria-label="Анимация: перо пишет на листе «Привет! Пишу пером на 3D-принтере.»" role="img">
+        <div class="bed-label"><span><i class="dot"></i>Печатает</span><span>Bambu Lab A1 · стол 256×256</span></div>
+        <svg class="paper" id="paper" viewBox="0 0 520 440" aria-hidden="true">
+          <rect class="sheet" x="0" y="0" width="520" height="440" rx="6"/>
+          <g class="grid" id="paper-grid"></g>
+          <line class="margin" x1="52" y1="0" x2="52" y2="440"/>
+<g class="ink" fill="none" stroke-linecap="round" stroke-linejoin="round">
+<path d="M73.76 147.24 L75.92 149.61 L76.51 149.95 L77.18 150 L77.9 149.73 L78.7 149.22 L80.43 147.63 L82.2 145.58 L83.99 143.14 L85.37 140.83 L87.19 137.29 L91.85 127.21 L106.8 95.9"/>
+<path d="M95.21 101.98 L100.39 97.01 L102.2 95.76 L103.91 95.16 L106.34 95.22 L113.16 96.95 L117.97 96.91 L121.9 96.47 L124.46 95.9 L126.46 95.11 L129.13 93.7"/>
+<path d="M121.15 95.9 L107.3 131.97 L105.12 138.2 L102.71 146.1 L102.61 147.48 L103.11 148.87 L103.72 149.51 L104.49 149.92 L105.33 150 L106.07 149.74 L106.91 149.21 L110.6 146.14"/>
+<path d="M119.44 127.92 L122.68 123.97 L123.4 123.28 L124 122.95 L124.72 123.05 L125.29 123.61 L125.61 124.61 L125.53 126.14 L125.04 128.39 L123.32 133.76 L120.76 140.55 L109.91 167.01 L106.17 176.5 L115.42 150.44 L119.29 140.67 L121.11 137 L122.54 134.61 L127.68 127 L129.14 125.12 L130.51 123.69 L131.73 122.95 L132.48 122.88 L133.99 123.44 L135.27 124.67 L135.74 125.44 L136.14 126.9 L136 128.49 L135.53 130.39 L132.46 138.85 L130.68 144.84 L130.28 146.65 L130.32 148.07 L131.19 149.48 L131.87 149.89 L132.65 150 L133.41 149.76 L134.28 149.23 L138.2 146.14"/>
+<path d="M139.65 146.69 L150.04 132.58 L156.77 122.4 L151.4 134.27 L149.29 139.63 L147.95 145.24 L147.8 146.98 L147.98 148.37 L148.78 149.46 L149.53 149.88 L151.34 150.18 L152.25 150 L152.96 149.67 L154.46 148.54 L156.03 146.91 L157.58 144.97 L159.62 141.81 L161.31 138.4 L167.81 122.4 L161.95 138.19 L159.88 144.89 L159.48 147.42 L159.92 148.84 L160.45 149.48 L161.13 149.89 L161.91 150 L162.66 149.76 L163.54 149.23 L167.45 146.14"/>
+<path d="M166.5 147.24 L172.48 140.05 L176.78 134.01 L182.11 125.47 L192.3 108.13 L194.42 103.84 L195.51 100.79 L196.08 98.64 L196.15 97.11 L195.92 96.73 L195.29 96.65 L194.36 96.9 L193.33 97.41 L192.39 98.11 L191.45 99.22 L190.13 101.59 L188.88 104.52 L184.57 115.18 L179.53 128.87 L175.65 138.82 L174.36 143.09 L174.04 146.58 L174.3 148.29 L175.08 149.45 L176.59 149.99 L178.61 150 L179.64 149.79 L181.41 149.01 L183.13 147.7 L185.54 145.13 L186.68 143.38 L187.33 141.64 L187.69 139.73 L187.68 137.02 L187.28 135.65 L186.2 134.43 L185.46 133.97 L183.86 133.45 L183.11 133.44 L182.18 133.72 L181.16 134.27 L180.32 134.88 L179.93 135.37 L180.19 135.78 L182.03 136.39 L183.11 136.48 L184.86 136.12 L189.99 134.27 L196.56 132.89"/>
+<path d="M193.35 141.72 L199.32 138.96 L206.32 137.2 L208.25 136.21 L210.29 134.91 L213.2 132.57 L214.7 130.93 L215.23 130.13 L215.64 129.25 L216.18 127.23 L216.29 125.23 L215.92 123.69 L215.54 123.23 L214.26 122.89 L211.37 123.35 L208.41 124.61 L205.96 126.5 L202.71 130.08 L200.03 133.99 L198.09 137.83 L196.62 141.95 L196.21 143.83 L196.09 145.46 L196.41 146.97 L196.81 147.71 L197.99 148.94 L199.48 149.76 L200.27 150 L201.85 150.1 L204.63 149.61 L206.51 148.99 L208.26 148.19 L209.94 147.1 L214.07 143.93"/>
+<path d="M223.21 127.92 L226.46 123.97 L227.17 123.28 L227.78 122.95 L228.5 123.07 L229.08 123.65 L229.39 124.61 L229.36 125.52 L228.69 128.19 L227.38 131.76 L219.59 150 L224.23 139.17 L226.98 133.71 L230.22 128.69 L232.43 125.68 L234.44 123.55 L235.51 122.95 L236.13 122.97 L236.71 123.27 L237.66 124.5 L238.17 126.26 L237.96 128.78 L236.38 134.13 L230.36 150 L234.99 139.17 L237.74 133.71 L240.94 128.71 L243.11 125.74 L245.13 123.6 L246.27 122.95 L247.02 122.94 L247.76 123.23 L249.02 124.5 L249.76 126.26 L249.78 127.66 L248.86 131.43 L246.17 138.85 L244.4 144.84 L243.99 146.65 L244.03 148.07 L244.91 149.48 L245.58 149.89 L246.36 150 L247.12 149.76 L248 149.23 L251.91 146.14"/>
+<path d="M279.63 100.32 L262.3 137.3"/>
+<path d="M257.77 148.62 L257.79 148.01 L257.54 147.54 L256.97 147.41 L256.3 147.54 L255.7 148.01 L255.28 148.62 L255.26 149.23 L255.51 149.7 L256.09 149.83 L256.76 149.7 L257.35 149.23 L257.77 148.62"/>
+<path d="M73.76 251.24 L75.92 253.61 L76.51 253.95 L77.18 254 L77.9 253.73 L78.7 253.22 L80.43 251.63 L82.2 249.58 L83.99 247.14 L85.37 244.83 L87.19 241.29 L91.85 231.21 L106.8 199.9"/>
+<path d="M95.21 205.98 L100.39 201.01 L102.2 199.76 L103.91 199.16 L106.34 199.22 L113.16 200.95 L117.97 200.91 L121.9 200.47 L124.46 199.9 L126.46 199.11 L129.13 197.7"/>
+<path d="M121.15 199.9 L107.3 235.97 L105.12 242.2 L102.71 250.1 L102.61 251.48 L103.11 252.87 L103.72 253.51 L104.49 253.92 L105.33 254 L106.07 253.74 L106.91 253.21 L110.6 250.14"/>
+<path d="M112.05 250.69 L122.44 236.58 L129.17 226.4 L123.8 238.27 L121.69 243.63 L120.35 249.24 L120.2 250.98 L120.38 252.37 L121.18 253.46 L121.93 253.88 L123.74 254.18 L124.65 254 L125.36 253.67 L126.86 252.54 L128.43 250.91 L129.98 248.97 L132.02 245.81 L133.71 242.4 L140.21 226.4 L134.35 242.19 L132.28 248.89 L131.88 251.42 L132.32 252.84 L132.85 253.48 L133.53 253.89 L134.31 254 L135.06 253.76 L135.94 253.23 L139.85 250.14"/>
+<path d="M139.65 250.69 L150.04 236.58 L156.77 226.4 L151.4 238.27 L149.29 243.63 L148.33 247.26 L147.84 250.15 L147.84 251.73 L148.23 252.9 L148.78 253.46 L150.41 254.13 L151.34 254.18 L152.25 254 L152.96 253.67 L154.46 252.54 L156.03 250.91 L157.58 248.97 L159.62 245.81 L161.31 242.4 L167.81 226.4 L162.44 238.27 L160.33 243.63 L158.99 249.24 L158.84 250.98 L159.02 252.37 L159.82 253.46 L160.57 253.88 L162.38 254.18 L163.29 254 L164 253.67 L165.5 252.54 L167.07 250.91 L168.62 248.97 L170.66 245.81 L172.35 242.4 L178.85 226.4 L172.99 242.19 L170.92 248.89 L170.52 251.42 L170.96 252.84 L171.49 253.48 L172.17 253.89 L172.95 254 L173.7 253.76 L174.58 253.23 L178.49 250.14"/>
+<path d="M178.29 250.69 L188.68 236.58 L195.41 226.4 L190.47 237.29 L188.52 241.95 L187.22 246.22 L186.48 250.15 L186.62 252.37 L187.42 253.46 L188.17 253.88 L189.98 254.18 L190.89 254 L191.6 253.67 L193.1 252.54 L194.67 250.91 L196.22 248.97 L197.4 247.27 L198.69 245.01 L201.18 239.54 L206.45 226.4 L198.25 247.56 L193.3 259.12 L189.9 266.17 L186.28 272.85 L184.09 276.11 L182.94 277.35 L180.82 278.96 L178.8 279.92 L178.13 279.94 L177.75 279.56 L177.54 278.82 L177.67 276.81 L177.99 275.79 L178.87 274.3 L181.02 271.77 L186.2 266.77 L190.41 263.2 L197.43 257.85 L204.54 252.9"/>
+<path d="M235.36 231.92 L238.6 227.97 L239.32 227.28 L239.92 226.95 L240.64 227.07 L241.22 227.65 L241.53 228.61 L241.5 229.52 L240.84 232.19 L239.52 235.76 L231.74 254 L236.37 243.17 L239.12 237.71 L242.28 232.74 L244.42 229.79 L246.45 227.64 L247.65 226.95 L248.4 226.88 L249.17 227.06 L250.6 227.99 L251.66 229.44 L251.97 230.26 L252.04 231.65 L251.13 235.42 L248.38 242.85 L246.6 248.84 L246.2 250.65 L246.24 252.07 L247.11 253.48 L247.79 253.89 L248.57 254 L249.33 253.76 L250.21 253.23 L254.12 250.14"/>
+<path d="M256.28 245.72 L262.25 242.96 L269.25 241.2 L271.18 240.21 L273.22 238.91 L276.13 236.57 L277.63 234.93 L278.16 234.13 L278.57 233.25 L279.11 231.23 L279.22 229.23 L278.85 227.69 L278.46 227.23 L277.19 226.89 L274.3 227.35 L271.34 228.61 L268.88 230.5 L265.64 234.08 L262.95 237.99 L261.02 241.83 L259.55 245.95 L259.14 247.83 L259.02 249.46 L259.33 250.97 L259.74 251.71 L260.91 252.94 L262.4 253.76 L263.2 254 L264.78 254.1 L267.56 253.61 L269.44 252.99 L271.18 252.19 L272.87 251.1 L277 247.93"/>
+<path d="M286.14 231.92 L289.38 227.97 L290.1 227.28 L290.71 226.95 L291.42 227.05 L292 227.61 L292.31 228.61 L292.24 230.14 L291.74 232.39 L290.02 237.76 L287.46 244.55 L276.61 271.01 L272.88 280.5 L282.12 254.44 L285.99 244.67 L287.81 241 L289.24 238.61 L294.39 231 L295.84 229.12 L297.22 227.69 L298.44 226.95 L299.19 226.88 L300.7 227.44 L301.98 228.67 L302.45 229.44 L302.84 230.9 L302.7 232.49 L302.23 234.39 L299.17 242.85 L297.39 248.84 L296.98 250.65 L297.02 252.07 L297.9 253.48 L298.58 253.89 L299.36 254 L300.11 253.76 L300.99 253.23 L304.9 250.14"/>
+<path d="M310.53 234.68 L315.61 232.28 L317.22 230.4 L319.46 228.38 L321.14 227.3 L322.76 226.63 L324.74 226.42 L326.41 226.99 L327.67 228.31 L328.46 230.31 L328.73 232.87 L328.31 236.63 L327.4 239.88 L325.62 243.96 L323.28 247.69 L321.14 250.22 L320.02 251.28 L318.33 252.57 L317.22 253.21 L315.61 253.82 L314.11 254 L313.21 253.87 L312.39 253.55 L311.35 252.71 L310.79 251.92 L310.19 250.44 L309.84 247.26 L310.32 243.47 L311.59 239.38 L313.55 235.36 L316.01 231.77 L317.64 229.96 L319.89 228.06 L321.56 227.09 L323.67 226.44 L325.09 226.47 L326.32 226.94 L327.33 227.83 L328.28 229.63 L336.27 229.16"/>
+<path d="M331.75 250.69 L332.65 252.77 L333.01 253.27 L333.5 253.45 L334.14 253.23 L334.89 252.72 L336.62 251.05 L338.98 248.37 L340.13 246.83 L348.06 234.68 L354.94 226.4 L345.45 254 L352.22 241.67 L355.4 236.55 L358.2 232.95 L364.33 226.4 L358.46 242.19 L356.39 248.89 L355.99 251.42 L356.43 252.84 L356.96 253.48 L357.64 253.89 L358.42 254 L359.18 253.76 L360.05 253.23 L363.97 250.14"/>
+<path d="M78.59 335.92 L81.83 331.97 L82.55 331.28 L83.16 330.95 L83.88 331.07 L84.45 331.65 L84.76 332.61 L84.74 333.52 L84.07 336.19 L82.75 339.76 L74.97 358"/>
+<path d="M79.66 345.86 L83.68 343.31 L85.56 342.54 L86.38 342.57 L89.37 343.82 L90.13 343.65 L90.63 343.31 L91.63 342.19 L92.64 340.61 L97.71 330.4 L91.59 346.19 L89.49 352.89 L89.1 355.42 L89.54 356.84 L90.07 357.48 L90.75 357.89 L91.53 358 L92.28 357.76 L93.16 357.23 L97.07 354.14"/>
+<path d="M102.98 338.68 L109.62 334.44 L110.73 333.35 L112.42 332.01 L113.53 331.33 L115.15 330.65 L116.66 330.4 L118.43 330.75 L119.81 331.87 L120.74 333.68 L121.16 336.08 L120.93 339.71 L120.17 342.92 L118.54 347.01 L116.32 350.85 L114.24 353.52 L111.46 356.09 L110.34 356.84 L108.7 357.62 L107.66 357.91 L106.21 357.97 L104.56 357.38 L103.88 356.79 L103.07 355.59 L102.34 352.8 L102.36 350.01 L103.12 346.09 L104.63 341.99 L106.78 338.09 L108.29 335.99 L110.46 333.6 L112.14 332.2 L114.36 330.93 L115.93 330.47 L117.37 330.44 L118.63 330.86 L119.67 331.69 L125.86 330.4 L119.49 346.19 L117.36 352.89 L116.97 355.42 L117.41 356.84 L117.95 357.48 L118.62 357.89 L119.4 358 L120.16 357.76 L121.04 357.23 L124.95 354.14"/>
+<path d="M164.76 316.05 L170.43 310.42 L172.04 309.14 L173.64 308.32 L176.44 307.93 L179.3 308.34 L181.45 309.46 L182.14 310.59 L182.34 312.22 L181.91 315.27 L180.77 318.51 L179.18 321.21 L177.87 322.66 L176.3 324.07 L167.06 330.95 L172.03 334.99 L173.02 336.12 L173.67 337.41 L173.89 338.91 L173.75 340.69 L173.32 342.68 L172.23 345.82 L170.19 349.75 L169.01 351.38 L167.47 352.99 L165.64 354.51 L163.64 355.86 L160.66 357.41 L158.87 358 L157.05 358.18 L155.24 357.97 L153.59 357.47 L152.25 356.75 L151.31 355.77 L151.05 355.08 L150.59 351.93"/>
+<path d="M207.82 303.9 L189.43 339.38 L186.93 343.84 L184.25 348.02 L182.06 351.15 L179.89 353.89 L178.49 355.33 L177.14 356.34 L175.11 357.09 L173.32 357.16 L172.8 356.9 L172.59 356.26 L172.65 355.25 L173.34 353.12 L173.85 352.48 L174.38 352.28 L175.04 352.27 L179.93 353.84 L184.21 356.36 L185.78 357.07 L187.45 357.44 L189.17 357.36 L192.96 356.38 L196 355.09 L197.99 354 L199.87 352.76 L202.25 350.73 L204.8 347.68 L207.12 344.03 L209.64 339.06 L212.07 333.16 L213.65 328.3 L214.85 323.22 L215.53 318.33 L215.59 314.83 L214.86 310.7 L213.54 307.54 L211.69 305.07 L210.61 304.22 L209.23 303.62 L207.35 303.35 L204.26 303.59 L201.54 304.46 L199.63 305.75 L197.95 307.43 L197.41 308.22 L197.18 308.87 L197.33 309.36 L197.81 309.76 L200.79 311.08"/>
+<path d="M212.47 344.2 L223.36 343.1"/>
+<path d="M229.28 335.92 L232.53 331.97 L233.25 331.28 L233.85 330.95 L234.57 331.07 L235.15 331.65 L235.46 332.61 L235.43 333.52 L234.76 336.19 L233.45 339.76 L225.66 358 L230.3 347.17 L233.05 341.71 L236.21 336.74 L238.35 333.79 L240.38 331.64 L241.58 330.95 L242.33 330.88 L243.1 331.06 L244.53 331.99 L245.59 333.44 L245.89 334.26 L245.96 335.65 L245.05 339.42 L242.31 346.85 L240.53 352.84 L240.13 354.65 L240.17 356.07 L241.04 357.48 L241.72 357.89 L242.5 358 L243.26 357.76 L244.13 357.23 L248.05 354.14"/>
+<path d="M256.88 335.92 L260.13 331.97 L260.85 331.28 L261.45 330.95 L262.17 331.05 L262.74 331.61 L263.06 332.61 L262.98 334.14 L262.48 336.39 L260.77 341.76 L258.21 348.55 L247.36 375.01 L243.62 384.5 L252.86 358.44 L256.74 348.67 L258.55 345 L259.99 342.61 L265.13 335 L266.58 333.12 L267.96 331.69 L269.18 330.95 L269.93 330.88 L271.44 331.44 L272.72 332.67 L273.19 333.44 L273.58 334.9 L273.45 336.49 L272.98 338.39 L269.91 346.85 L268.13 352.84 L267.73 354.65 L267.77 356.07 L268.64 357.48 L269.32 357.89 L270.1 358 L270.86 357.76 L271.73 357.23 L275.65 354.14"/>
+<path d="M277.1 354.69 L287.49 340.58 L294.22 330.4 L288.85 342.27 L286.74 347.63 L285.4 353.24 L285.25 354.98 L285.43 356.37 L286.23 357.46 L286.98 357.88 L288.79 358.18 L289.7 358 L290.4 357.67 L291.91 356.54 L293.47 354.91 L295.02 352.97 L297.07 349.81 L298.76 346.4 L305.26 330.4 L299.4 346.19 L297.33 352.89 L296.93 355.42 L297.37 356.84 L297.9 357.48 L298.58 357.89 L299.36 358 L300.11 357.76 L300.99 357.23 L304.9 354.14"/>
+<path d="M312.08 335.92 L315.33 331.97 L316.05 331.28 L316.65 330.95 L317.37 331.07 L317.95 331.65 L318.26 332.61 L318.23 333.52 L317.56 336.19 L316.25 339.76 L308.46 358"/>
+<path d="M313.16 345.86 L317.17 343.31 L319.06 342.54 L319.87 342.57 L322.87 343.82 L323.62 343.65 L324.12 343.31 L325.13 342.19 L326.14 340.61 L331.21 330.4 L325.09 346.19 L322.99 352.89 L322.6 355.42 L323.03 356.84 L323.57 357.48 L324.24 357.89 L325.02 358 L325.78 357.76 L326.66 357.23 L330.57 354.14"/>
+<path d="M339.68 335.92 L342.93 331.97 L343.65 331.28 L344.25 330.95 L344.97 331.07 L345.55 331.65 L345.86 332.61 L345.83 333.52 L345.16 336.19 L343.85 339.76 L336.06 358 L340.7 347.17 L343.45 341.71 L346.69 336.69 L348.9 333.68 L350.91 331.55 L351.98 330.95 L352.6 330.97 L353.18 331.27 L354.13 332.5 L354.64 334.26 L354.44 336.78 L352.85 342.13 L346.83 358 L351.47 347.17 L354.21 341.71 L357.41 336.71 L359.58 333.74 L361.61 331.6 L362.74 330.95 L363.49 330.94 L364.23 331.23 L365.49 332.5 L366.23 334.26 L366.26 335.66 L365.33 339.43 L362.64 346.85 L360.87 352.84 L360.46 354.65 L360.5 356.07 L361.38 357.48 L362.06 357.89 L362.84 358 L363.59 357.76 L364.47 357.23 L368.38 354.14"/>
+<path d="M370.54 349.72 L376.51 346.96 L383.51 345.2 L385.45 344.21 L387.48 342.91 L390.39 340.57 L391.9 338.93 L392.43 338.13 L392.84 337.25 L393.37 335.23 L393.48 333.23 L393.11 331.69 L392.73 331.23 L391.45 330.89 L388.57 331.35 L385.6 332.61 L383.15 334.5 L379.9 338.08 L377.22 341.99 L375.29 345.83 L373.81 349.95 L373.4 351.83 L373.28 353.46 L373.6 354.97 L374 355.71 L375.18 356.94 L376.67 357.76 L377.46 358 L379.05 358.1 L381.82 357.61 L383.7 356.99 L385.45 356.19 L387.13 355.1 L391.27 351.93"/>
+<path d="M400.4 335.92 L403.65 331.97 L404.37 331.28 L404.97 330.95 L405.69 331.05 L406.26 331.61 L406.58 332.61 L406.5 334.14 L406 336.39 L404.29 341.76 L401.73 348.55 L390.88 375.01 L387.14 384.5 L396.38 358.44 L400.26 348.67 L402.07 345 L403.51 342.61 L408.65 335 L410.1 333.12 L411.48 331.69 L412.7 330.95 L413.45 330.88 L414.96 331.44 L416.24 332.67 L416.71 333.44 L417.1 334.9 L416.97 336.49 L416.5 338.39 L413.43 346.85 L411.65 352.84 L411.25 354.65 L411.29 356.07 L412.16 357.48 L412.84 357.89 L413.62 358 L414.38 357.76 L415.25 357.23 L419.17 354.14"/>
+<path d="M421.33 349.72 L427.3 346.96 L434.3 345.2 L436.23 344.21 L438.26 342.91 L441.18 340.57 L442.68 338.93 L443.21 338.13 L443.62 337.25 L444.15 335.23 L444.26 333.23 L443.89 331.69 L443.51 331.23 L442.23 330.89 L439.35 331.35 L436.39 332.61 L433.93 334.5 L430.69 338.08 L428 341.99 L426.07 345.83 L424.6 349.95 L424.18 351.83 L424.06 353.46 L424.38 354.97 L424.79 355.71 L425.96 356.94 L427.45 357.76 L428.25 358 L429.83 358.1 L432.61 357.61 L434.49 356.99 L436.23 356.19 L437.91 355.1 L442.05 351.93"/>
+<path d="M447.66 356.62 L447.68 356.01 L447.43 355.54 L446.85 355.41 L446.18 355.54 L445.59 356.01 L445.17 356.62 L445.15 357.23 L445.4 357.7 L445.97 357.83 L446.64 357.7 L447.24 357.23 L447.66 356.62"/>
+</g>
+          <g id="pen" transform="translate(470 120)">
+            <ellipse id="pen-shadow" cx="18" cy="16" rx="34" ry="7" fill="#28406E" opacity=".14" transform="rotate(-30)"/>
+            <g id="pen-body" transform="rotate(-58)">
+              <path d="M0 0C8-2 18-7 27-7L27 7C18 7 8 2 0 0Z" fill="#EAF3FF"/>
+              <path d="M4 0H15" stroke="#0B3D8C" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="16" cy="0" r="1.8" fill="#0B3D8C"/>
+              <rect x="27" y="-8.5" width="9" height="17" rx="2" fill="#4F8DE6"/>
+              <rect x="36" y="-9.5" width="130" height="19" rx="9.5" fill="#0A84FF"/>
+              <rect x="36" y="-9.5" width="130" height="7" rx="3.5" fill="#fff" opacity=".22"/>
+              <rect x="128" y="-11" width="6" height="22" rx="2" fill="#0A6CDD"/>
+            </g>
+          </g>
+        </svg>
+        <div class="bed-foot">перо пишет — сопло отдыхает</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="app">
+    <div class="section-head reveal">
+      <h2>Всё в одном окне</h2>
+      <p>Слева — разделы и инструменты, в центре — лист как он есть и текст под ним, справа — настройки выбранного раздела. Оформление — матовое стекло: по умолчанию светлое, ещё пять цветов в «Вид → Оформление».</p>
+    </div>
+    <div class="shot-wrap reveal d1">
+      <img class="shot" src="app-main.png" width="1440" height="900" loading="lazy" alt="Окно Clover Plotter: слева разделы Лист, Письмо, Блоки, Рисунок, Точность, Сервис и ИИ, в центре показатели, Preview листа с письмом прописью и поле текста, справа настройки страницы">
+    </div>
+    <div class="metrics">
+      <div class="panel metric reveal">
+        <div class="metric-cap"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-gift"/></svg></span>Цена</div>
+        <div class="metric-value">0 ₽</div><div class="metric-hint">Без рекламы и регистрации</div>
+      </div>
+      <div class="panel metric reveal d1">
+        <div class="metric-cap"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span>Принтеры</div>
+        <div class="metric-value">14</div><div class="metric-hint">Bambu Lab, Creality, Elegoo, Sovol</div>
+      </div>
+      <div class="panel metric reveal d2">
+        <div class="metric-cap"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg></span>Почерки</div>
+        <div class="metric-value">4 + ваш</div><div class="metric-hint">Прописи и редактор почерка</div>
+      </div>
+      <div class="panel metric reveal d3">
+        <div class="metric-cap"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-eye"/></svg></span>Preview</div>
+        <div class="metric-value">1 : 1</div><div class="metric-hint">Что на экране — то на бумаге</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="section-head reveal">
+      <h2>Как это работает</h2>
+      <p>Принтер остаётся принтером: в держатель вместо пластика ставится ручка, а Clover Plotter готовит G-code, по которому она пишет.</p>
+    </div>
+    <div class="flow">
+      <div class="panel step reveal"><div class="num">1</div><h3>Ручка в держатель</h3><p>Закрепите ручку рядом с соплом и выберите свой принтер. Машинные координаты программа берёт из профиля — вводить их не нужно.</p></div>
+      <div class="panel step reveal d1"><div class="num">2</div><h3>Текст и оформление</h3><p>Напишите или вставьте текст, выберите почерк, лист и линовку. Можно добавить формулы, таблицы, фигуры и рисунок.</p></div>
+      <div class="panel step reveal d2"><div class="num">3</div><h3>Проверьте Preview</h3><p>Лист показан как он есть, в миллиметрах. Текст и блоки двигаются мышью прямо на листе, полоса замечаний подскажет, если что-то выходит за край.</p></div>
+      <div class="panel step reveal d3"><div class="num">4</div><h3>G-code — на принтер</h3><p>«Сгенерировать G-code» или <code>Ctrl+G</code> — и файл готов. Отправьте его на принтер как обычную печать.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-head reveal">
+      <h2>Возможности</h2>
+      <p>От открытки бабушке до конспекта с формулами: всё, что пишут от руки, Clover Plotter напишет ручкой на вашем принтере.</p>
+    </div>
+    <div class="features">
+      <article class="panel feature reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-hand"/></svg></span><h3>Почерк как от руки</h3><p>Школьные прописи с соединениями букв, наклоном, лёгким дрожанием и разбросом размера — строки не выглядят напечатанными.</p></article>
+      <article class="panel feature reveal d1"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg></span><h3>Свой почерк</h3><p>Нарисуйте буквы мышью, пером планшета или пальцем — программа сохранит их как шрифт и сразу будет им писать.</p></article>
+      <article class="panel feature reveal d2"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-sigma"/></svg></span><h3>Формулы</h3><p>LaTeX в тексте: дроби, корни, степени, индексы и химические уравнения — рукописные, того же размера, что и строка.</p></article>
+      <article class="panel feature reveal d3"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg></span><h3>Рисунки линиями</h3><p>Фото превращается в контурный рисунок пером — нейросетью прямо на компьютере. Штриховка, волны, размер и место на листе.</p></article>
+      <article class="panel feature reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-table"/></svg></span><h3>Блоки и таблицы</h3><p>Абзацы, таблицы, линии, рамки и десятки фигур — каждая на своём месте. Выравнивание, дублирование и порядок письма по листу.</p></article>
+      <article class="panel feature reveal d1"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-lines"/></svg></span><h3>Линовка и тетради</h3><p>Клетка, линейка, поля и готовые шаблоны тетрадей: строки садятся ровно на линии, без накопления ошибки.</p></article>
+      <article class="panel feature reveal d2"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-eye"/></svg></span><h3>Preview без сюрпризов</h3><p>Лист в миллиметрах, линейка, поворот, масштаб колесом. Вид сверху на стол показывает, где лежит тетрадь и где начнётся письмо.</p></article>
+      <article class="panel feature reveal d3"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-pages"/></svg></span><h3>Много страниц</h3><p>Длинный текст сам делится на страницы. Сохраните все сразу или только нужную — номер выбирается прямо в окне.</p></article>
+      <article class="panel feature reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-ai"/></svg></span><h3>ИИ-помощник</h3><p>Задача по фото — решение пишется от руки, формулы отдельно. Локально через Ollama или LM Studio, или с вашим ключом OpenAI, Gemini, DeepSeek, Qwen.</p></article>
+      <article class="panel feature reveal d1"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-gauge"/></svg></span><h3>Скорость и точность</h3><p>Скорость письма, холостого хода и ускорения, подъём пера и карта времени холостых перемещений — видно, где теряются минуты.</p></article>
+      <article class="panel feature reveal d2"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span><h3>Текст из файла</h3><p>.txt в UTF-8, CP1251 или UTF-16 — кодировка определяется сама. Наборы настроек и профили принтеров сохраняются в файлы.</p></article>
+      <article class="panel feature reveal d3"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg></span><h3>Проверка G-code</h3><p>Каждый файл проверяется перед сохранением, а диагностический G-code с крестами по углам помогает выставить перо и лист.</p></article>
+    </div>
+  </section>
+
+  <section class="section" id="printers">
+    <div class="section-head reveal">
+      <h2>Принтеры</h2>
+      <p>Выберите модель — размеры стола, начало координат и скорости подставятся сами. Профиль можно подправить, сохранить в файл и передать другу.</p>
+    </div>
+    <div class="printers">
+      <div class="panel printer top-pick reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Bambu Lab A1</b><small>стол 256×256 мм</small><span class="tag">основной</span></div></div>
+      <div class="panel printer top-pick reveal d1"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Bambu Lab A1 mini</b><small>стол 180×180 мм</small><span class="tag">основной</span></div></div>
+      <div class="panel printer reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Creality Ender-3</b><small>Ender-3, Pro, Neo — 220×220 мм</small></div></div>
+      <div class="panel printer reveal d1"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Creality Ender-3 V2</b><small>V2 и V2 Neo — 220×220 мм</small></div></div>
+      <div class="panel printer reveal d2"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Creality Ender-3 S1</b><small>S1 и S1 Pro — 220×220 мм</small></div></div>
+      <div class="panel printer reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Ender-3 S1 Plus / Max Neo</b><small>300×300 мм</small></div></div>
+      <div class="panel printer reveal d1"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Creality Ender-3 V3 SE</b><small>220×220 мм</small></div></div>
+      <div class="panel printer reveal d2"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>ELEGOO Neptune 3 Pro</b><small>225×225 мм</small></div></div>
+      <div class="panel printer reveal"><span class="tile"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg></span><div><b>Sovol SV06</b><small>220×220 мм</small></div></div>
+    </div>
+    <p class="note reveal">Профили Creality, ELEGOO и Sovol проверены программно, на этих принтерах ещё не испытаны — первый лист пишите под присмотром. Подходит и другой принтер с подвижным столом: импортируйте или настройте свой профиль.</p>
+  </section>
+
+  <section class="section" id="handwriting">
+    <div class="split flip">
+      <div class="shot-wrap reveal">
+        <img class="shot" src="app-handwriting.png" width="1196" height="799" loading="lazy" alt="Редактор «Мой почерк»: алфавит слева, справа холст с направляющими, на котором рисуется буква">
+      </div>
+      <div class="reveal d1">
+        <h2>Пишет вашим почерком</h2>
+        <p class="lead">Откройте «Мой почерк», нарисуйте буквы на холсте с направляющими — и Clover Plotter будет писать ими. Хоть мышью, хоть пером графического планшета, хоть пальцем на сенсорном экране.</p>
+        <ul class="checks">
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div><b>Направляющие как в прописи</b> <span>— базовая линия, строчные, заглавные и выносные элементы.</span></div></li>
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div><b>Образец под рукой</b> <span>— полупрозрачная буква из выбранного шрифта, по которой удобно обводить.</span></div></li>
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div><b>Сглаживание</b> <span>— убирает дрожание руки, но оставляет характер.</span></div></li>
+          <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><div><b>Сразу в списке шрифтов</b> <span>— недорисованные буквы достраиваются из выбранной прописи.</span></div></li>
+        </ul>
+        <a class="btn primary big" href="#install"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Попробовать</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="install">
+    <div class="section-head reveal">
+      <h2>Установка за минуту</h2>
+      <p>Один файл — внутри всё нужное: ни Python, ни регистрации, ни ключа активации.</p>
+    </div>
+    <div class="steps">
+      <div class="panel step reveal"><div class="num">1</div><h3>Скачайте</h3><p><code>Clover-Plotter.exe</code>, <span data-size>80 МБ</span> — программа целиком в одном файле.</p></div>
+      <div class="panel step reveal d1"><div class="num">2</div><h3>Запустите</h3><p>Установка не нужна. Если Windows покажет «Система Windows защитила ваш компьютер» — «Подробнее» → «Выполнить в любом случае»: у программы нет платной подписи.</p></div>
+      <div class="panel step reveal d2"><div class="num">3</div><h3>Настройте один раз</h3><p>Выберите принтер, лист и почерк. Настройки сохраняются в профиле Windows и подхватятся в новой версии сами.</p></div>
+    </div>
+    <div class="panel get reveal">
+      <svg class="app-icon" aria-hidden="true"><use href="#plotter-icon"/></svg>
+      <div class="get-text">
+        <b>Clover Plotter <span data-ver>1.2.1</span> для Windows</b>
+        <span>Текст, формулы и рисунки — ручкой на 3D-принтере. Бесплатно.</span>
+        <div class="reqs">
+          <span class="req"><svg class="i" aria-hidden="true"><use href="#i-windows"/></svg>Windows 10/11, 64 бит</span>
+          <span class="req"><svg class="i" aria-hidden="true"><use href="#i-box"/></svg>Один файл, <span data-size>80 МБ</span></span>
+          <span class="req"><svg class="i" aria-hidden="true"><use href="#i-printer"/></svg>Принтер с подвижным столом</span>
+        </div>
+      </div>
+      <a class="btn primary big" href="https://github.com/NiceKiller28/clover-plotter/releases/latest/download/Clover-Plotter.exe" data-dl="exe"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Скачать</a>
+    </div>
+    <a class="panel to-guide reveal" href="#guide">
+      <span class="tile warn-tile"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></span>
+      <span><b>Перед первым запуском — инструкция</b><span>Homing, лист, ручка и прижим: 7 шагов, чтобы перо и стол остались целы.</span></span>
+      <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg>
+    </a>
+  </section>
+
+  <section class="section" id="guide">
+    <div class="section-head reveal">
+      <h2>Инструкция</h2>
+      <p>Порядок действий перед запуском файла. Займёт пару минут.</p>
+    </div>
+    <div class="guide">
+      <ol class="timeline reveal">
+        <li><span class="num">1</span><div><b>Включите принтер без ручки</b><p>Перо в держатель пока не ставьте.</p></div></li>
+        <li><span class="num">2</span><div><b>Сделайте homing по всем трём осям</b><p>Вручную, через меню принтера: обычный homing по X, Y и Z.</p></div></li>
+        <li><span class="num">3</span><div><b>Поднимите сопло</b><p>Повыше по оси Z, чтобы было удобно положить лист и поставить ручку.</p></div></li>
+        <li><span class="num">4</span><div><b>Закрепите лист бумаги</b><p>На столе принтера — так, чтобы он не сдвигался во время письма.</p></div></li>
+        <li class="opt"><span class="num">5</span><div><b>Установите ручку в держатель <em>по желанию</em></b><p>Вылет кончика пера — примерно на <code>12,00 мм</code> ниже среза сопла: так заложено в профиле.</p></div></li>
+        <li class="opt"><span class="num">6</span><div><b>Опустите ось Z в ноль и проверьте прижим <em>по желанию</em></b><p>Ручка должна касаться бумаги в меру: в профиле заложен преднатяг <code>0,35 мм</code>.</p></div></li>
+        <li class="opt"><span class="num">7</span><div><b>Поднимите сопло и запускайте файл <em>по желанию</em></b><p>Первый лист — под присмотром: при опасном движении остановите печать.</p></div></li>
+      </ol>
+      <div class="guide-side">
+        <div class="panel callout reveal d1">
+          <span class="tile warn-tile"><svg class="i" aria-hidden="true"><use href="#i-warn"/></svg></span>
+          <h3>Почему homing — вручную</h3>
+          <p>В G-code заложена команда <code>G28 X Y</code>: она отправляет принтер «домой» только по осям X и Y. Ось Z пропущена намеренно, чтобы принтер случайно не раздавил перо о стол во время калибровки.</p>
+        </div>
+        <div class="panel callout soft reveal d2">
+          <span class="tile"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg></span>
+          <h3>Шаги 5–7 — не догма</h3>
+          <p>Вылет и прижим каждый подбирает под свой держатель и ручку. Числа выше — ориентир из профиля по умолчанию; их можно поменять в профиле принтера.</p>
+        </div>
+        <div class="panel callout reveal d3">
+          <span class="tile"><svg class="i" aria-hidden="true"><use href="#i-sparkle"/></svg></span>
+          <h3>Что внутри</h3>
+          <p>В основе — улучшенная версия bambu-plotter-fast-preview:</p>
+          <ul class="checks small">
+            <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>ускоренный предпросмотр при масштабировании больших страниц;</span></li>
+            <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>текст и несколько формул в одной записи;</span></li>
+            <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>новая стеклянная иконка и название — теперь Clover Plotter;</span></li>
+            <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>оформление «стекло» в шести цветах: светлое по умолчанию, остальные — в меню «Вид → Оформление»;</span></li>
+            <li><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span><span>поддержка новых принтеров.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="section-head reveal">
+      <h2>Вопросы</h2>
+    </div>
+    <div class="faq">
+      <details class="panel reveal"><summary>Это правда бесплатно?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p>Да. Без рекламы, подписок, регистрации и ключа активации.</p></details>
+      <details class="panel reveal"><summary>Какая ручка подойдёт?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p>Любая, которую можно надёжно закрепить в держателе рядом с соплом: гелевая, шариковая, капиллярная, даже карандаш — для него в «Сервисе» есть настройки нажима и износа грифеля. Вылет и прижим задаются в профиле принтера и проверяются диагностическим G-code.</p></details>
+      <details class="panel reveal"><summary>Принтер не испортится?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p>Clover Plotter не греет стол и сопло и не подаёт пластик — только перемещения. Ось Z при homing пропускается, чтобы не раздавить перо, а перед сохранением G-code проверяется на выход за границы стола. Первый лист всё равно пишите под присмотром.</p></details>
+      <details class="panel reveal"><summary>Нужен ли интернет?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p>Нет. Всё, включая нейросеть для рисунков, работает на компьютере. Интернет нужен только облачному ИИ-помощнику, если вы сами его выберете вместо локального.</p></details>
+      <details class="panel reveal"><summary>Где хранится ключ ИИ?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p>Только в памяти, пока программа открыта. При смене провайдера или адреса поле очищается, чтобы ключ не ушёл другому сервису. Без телеметрии.</p></details>
+      <details class="panel reveal"><summary>Где мои настройки?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p>В профиле Windows: <code>%APPDATA%\BambuPlotterWriter</code> — там настройки, наборы, ваш почерк и импортированные шрифты. Новая версия подхватит их сама.</p></details>
+      <details class="panel reveal"><summary>Горячие клавиши?<svg class="i" aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+        <p><code>Ctrl+G</code> — сгенерировать G-code, <code>Ctrl+1</code>…<code>Ctrl+7</code> — разделы слева, <code>Ctrl+Z</code> / <code>Ctrl+Y</code> — отменить и повторить. Работают и в русской раскладке.</p></details>
+    </div>
+  </section>
+
+  <footer>
+    <div class="row">
+      <a class="brand" href="#top" aria-label="Clover Plotter — наверх">
+        <svg class="app-icon" aria-hidden="true"><use href="#plotter-icon"/></svg>
+        <span class="brand-text"><b>Clover Plotter</b></span>
+      </a>
+      <span>Clover Plotter <span data-ver>1.2.1</span> · из семьи <a href="/">Clover</a> · все приложения в <a href="/">Clover Store</a></span>
+      <span>Шрифты Ronin — с разрешения автора. Рисунки линиями — модель informative-drawings (MIT, © 2022 Caroline Chan). Также использует NumPy, Matplotlib, ezdxf, pypdfium2, resvg и ONNX Runtime.</span>
+      <span>Анимация на главной написана штрихами шрифта «Пропись» из программы.</span>
+    </div>
+  </footer>
+</main>
+
+<script>
+  /* Новая версия на GitHub: номер, размер и ссылка подставляются сами — сайт не нужно менять к каждому выпуску. */
+  (function () {
+    if (!window.fetch) return;
+    fetch('https://api.github.com/repos/NiceKiller28/clover-plotter/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (release) {
+        if (!release || release.draft || release.prerelease) return;
+        var tag = String(release.tag_name || '').replace(/^v/i, '');
+        if (!/^\d+(\.\d+){1,3}(-[0-9A-Za-z.]+)?$/.test(tag)) return;
+        var exe = (release.assets || []).filter(function (a) { return /\.exe$/i.test(a.name) && /^https:\/\/github\.com\//.test(a.browser_download_url); })[0];
+        document.querySelectorAll('[data-ver]').forEach(function (el) { el.textContent = tag.replace('-', ' '); });
+        if (exe) {
+          var size = Math.round(exe.size / 1048576) + ' МБ';
+          document.querySelectorAll('[data-size]').forEach(function (el) { el.textContent = size; });
+          document.querySelectorAll('a[data-dl="exe"]').forEach(function (a) { a.href = exe.browser_download_url; });
+        }
+      })
+      .catch(function () { /* без сети: остаётся версия, записанная в странице */ });
+  })();
+</script>
+<script>
+  /* Тетрадная клетка на листе. */
+  (function () {
+    var g = document.getElementById('paper-grid'), ns = 'http://www.w3.org/2000/svg';
+    if (!g) return;
+    for (var x = 20; x < 520; x += 20) { var v = document.createElementNS(ns, 'line'); v.setAttribute('x1', x); v.setAttribute('x2', x); v.setAttribute('y1', 0); v.setAttribute('y2', 440); g.appendChild(v); }
+    for (var y = 20; y < 440; y += 20) { var h = document.createElementNS(ns, 'line'); h.setAttribute('y1', y); h.setAttribute('y2', y); h.setAttribute('x1', 0); h.setAttribute('x2', 520); g.appendChild(h); }
+  })();
+
+  /* Перо пишет: штрихи шрифта «Пропись» проявляются по очереди с постоянной скоростью, между штрихами перо
+     приподнимается и переезжает. После фразы — пауза, и всё сначала. «Плавные анимации» выключены — текст сразу целиком. */
+  (function () {
+    var svg = document.getElementById('paper');
+    if (!svg) return;
+    var root = document.documentElement;
+    var ink = svg.querySelector('.ink'), pen = document.getElementById('pen'), shadow = document.getElementById('pen-shadow');
+    var paths = Array.prototype.slice.call(ink.querySelectorAll('path'));
+    var lens = paths.map(function (p) { return p.getTotalLength(); });
+    var SPEED = 330, TRAVEL = .16, HOLD = 3.2, FADE = .7;
+    var plan = [], t = .5;
+    paths.forEach(function (p, i) {
+      if (i) { plan.push({ move: true, from: i - 1, to: i, a: t, b: t + TRAVEL }); t += TRAVEL; }
+      var d = lens[i] / SPEED;
+      plan.push({ i: i, a: t, b: t + d }); t += d;
+    });
+    var total = t, cycle = total + HOLD + FADE;
+    var startPt = paths.length ? paths[0].getPointAtLength(0) : { x: 0, y: 0 };
+    var rest = { x: 470, y: 120 };
+
+    function setPen(x, y, lift) {
+      pen.setAttribute('transform', 'translate(' + x.toFixed(1) + ' ' + (y - lift * 10).toFixed(1) + ')');
+      shadow.setAttribute('cx', (18 + lift * 6).toFixed(1));
+      shadow.setAttribute('cy', (16 + lift * 14).toFixed(1));
+      shadow.setAttribute('opacity', (.16 - lift * .07).toFixed(3));
+    }
+    function showAll() {
+      paths.forEach(function (p, i) { p.style.strokeDasharray = 'none'; p.style.strokeDashoffset = 0; p.style.opacity = 1; });
+      ink.classList.remove('fade');
+    }
+    // Не начатый штрих прозрачен: иначе скруглённый конец оставляет точку на пустом листе.
+    function reset() {
+      paths.forEach(function (p, i) { p.style.strokeDasharray = lens[i] + ' ' + lens[i]; p.style.strokeDashoffset = lens[i]; p.style.opacity = 0; });
+      ink.classList.remove('fade');
+    }
+
+    var running = false, t0 = 0, raf = 0, visible = true, last = -1;
+    function frame(now) {
+      raf = 0;
+      if (!running) return;
+      var e = ((now - t0) / 1000) % cycle;
+      if (e < last) reset();
+      last = e;
+      if (e < .5) {
+        var u = e / .5;
+        setPen(rest.x + (startPt.x - rest.x) * u, rest.y + (startPt.y - rest.y) * u, 1 - u * u);
+      } else if (e <= total) {
+        for (var k = 0; k < plan.length; k++) {
+          var s = plan[k];
+          if (s.move) {
+            if (e >= s.a && e < s.b) {
+              var q = (e - s.a) / (s.b - s.a);
+              var from = paths[s.from].getPointAtLength(lens[s.from]), to = paths[s.to].getPointAtLength(0);
+              setPen(from.x + (to.x - from.x) * q, from.y + (to.y - from.y) * q, Math.sin(Math.PI * q));
+            }
+            continue;
+          }
+          var p = paths[s.i];
+          if (e >= s.a) p.style.opacity = 1;
+          if (e >= s.b) p.style.strokeDashoffset = 0;
+          else if (e >= s.a) {
+            var done = lens[s.i] * (e - s.a) / (s.b - s.a);
+            p.style.strokeDashoffset = (lens[s.i] - done).toFixed(2);
+            var pt = p.getPointAtLength(done);
+            setPen(pt.x, pt.y, 0);
+          }
+        }
+      } else if (e <= total + HOLD) {
+        var end = paths[paths.length - 1].getPointAtLength(lens[lens.length - 1]);
+        var w = Math.min(1, (e - total) / .6);
+        setPen(end.x + (rest.x - end.x) * w, end.y + (rest.y - end.y) * w, Math.sin(Math.PI * Math.min(1, w)) * .8);
+      } else {
+        ink.classList.add('fade');
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    function update() {
+      var want = visible && !root.classList.contains('calm') && document.visibilityState !== 'hidden';
+      if (want && !running) { running = true; t0 = performance.now(); last = -1; reset(); if (!raf) raf = requestAnimationFrame(frame); }
+      if (!want && running) { running = false; showAll(); setPen(rest.x, rest.y, 0); }
+      if (!want && !running) showAll();
+    }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; update(); }, { threshold: .15 }).observe(svg);
+    }
+    document.addEventListener('visibilitychange', update);
+    document.addEventListener('calmchange', update);
+    showAll(); setPen(rest.x, rest.y, 0);
+    update();
+  })();
+</script>
+<script>
+  /* Боковая панель: подсветка раздела едет за прокруткой, на телефоне панель выезжает шторкой. */
+  (function () {
+    var nav = document.getElementById('nav'), highlight = nav.querySelector('.nav-highlight');
+    var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+    var root = document.documentElement, menu = document.getElementById('menu-btn');
+    function activate(id) {
+      links.forEach(function (a) {
+        var on = a.dataset.section === id;
+        a.setAttribute('aria-current', on ? 'true' : 'false');
+        if (on) highlight.style.transform = 'translateY(' + a.offsetTop + 'px)';
+      });
+    }
+    activate('top');
+    if ('IntersectionObserver' in window) {
+      var spy = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) { if (e.isIntersecting) activate(e.target.id); });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      links.forEach(function (a) { var s = document.getElementById(a.dataset.section); if (s) spy.observe(s); });
+    }
+    function setMenu(open) {
+      root.classList.toggle('nav-open', open);
+      menu.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menu.setAttribute('aria-label', open ? 'Закрыть меню' : 'Меню');
+    }
+    menu.addEventListener('click', function () { setMenu(!root.classList.contains('nav-open')); });
+    document.getElementById('backdrop').addEventListener('click', function () { setMenu(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+    document.getElementById('sidebar').addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  })();
+</script>
+<script>
+  /* Разделы проявляются при прокрутке; кнопки дают «рябь», как в приложении; переключатель «Плавные анимации». */
+  (function () {
+    var items = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { Array.prototype.forEach.call(items, function (el) { el.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+    Array.prototype.forEach.call(items, function (el) { io.observe(el); });
+  })();
+  document.addEventListener('pointerdown', function (e) {
+    var b = e.target.closest && e.target.closest('.btn');
+    if (!b || document.documentElement.classList.contains('calm')) return;
+    var r = b.getBoundingClientRect(), size = Math.max(r.width, r.height) * 2.2, dot = document.createElement('span');
+    dot.className = 'ripple';
+    dot.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + (e.clientX - r.left - size / 2) + 'px;top:' + (e.clientY - r.top - size / 2) + 'px';
+    b.appendChild(dot);
+    setTimeout(function () { dot.remove(); }, 600);
+  });
+  (function () {
+    var root = document.documentElement, toggle = document.getElementById('calm-toggle');
+    function sync() { toggle.setAttribute('aria-pressed', root.classList.contains('calm') ? 'false' : 'true'); }
+    toggle.addEventListener('click', function () {
+      root.classList.toggle('calm');
+      try { localStorage.setItem('clover-site-calm', root.classList.contains('calm') ? '1' : '0'); } catch (e) { }
+      if (!root.classList.contains('calm')) Array.prototype.forEach.call(document.querySelectorAll('.reveal'), function (el) { el.classList.add('in'); });
+      sync();
+      document.dispatchEvent(new Event('calmchange'));
+    });
+    sync();
+  })();
+</script>
+</body>
+</html>
